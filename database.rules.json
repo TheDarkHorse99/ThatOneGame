@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        "public": {
+          ".read": true,
+          ".write": "auth != null && (!data.exists() || data.child('seats/p1/uid').val() === auth.uid || data.child('seats/p2/uid').val() === auth.uid || !data.child('seats/p2').exists())"
+        },
+        "private": {
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        },
+        "spectate": {
+          "$uid": {
+            ".read": "auth != null && root.child('rooms').child($code).child('public/seats/p1/uid').val() !== auth.uid && root.child('rooms').child($code).child('public/seats/p2/uid').val() !== auth.uid",
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        }
+      }
+    }
+  }
+}

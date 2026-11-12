@@ -55,27 +55,34 @@ work). Hosting on GitHub Pages, below, is the easy way.
 
 ## How a game works on the site
 
+The table fills the screen and never scrolls. It is built for a computer first. On a phone,
+hold it sideways: upright, the room asks you to rotate.
+
 - **Create room** gives a 5-character code and an invite link. The second person to join with a
   deck is the opponent. Anyone after that, or anyone who picks "Just watch", is a spectator.
-- Spectators see everything except the decks: the table, both hands, what face-down cards
-  really are, life, discard piles and the log.
+- You see your opponent's hand as card backs. Spectators see both hands and what face-down
+  cards really are, but never the decks.
 - Each player may mulligan once before the game starts. **Start game** picks the first player
   at random.
+- **Drag** to do the common things:
+  - a card from your hand onto your field: play it (events go straight to the discard pile)
+  - a card from your hand onto your discard pile or deck: discard it, or put it on top
+  - your deck onto your hand: draw a card. Your deck onto your discard pile: mill a card
+  - your unit onto an opposing unit or onto the opponent: attack (you pick the color)
+  - a card on the table onto a discard pile, the "Out" chip, a deck or a hand: move it there
+    (units ask whether they were killed or only sent to the discard pile)
+  - a card on the table onto the other side of the field: change who controls it
+- **Tap or click** a card for everything else: rest/stand, play face down, flip, change stats,
+  markers (Condemned, Poisoned, Guard Duty), the soul under a card, and the less common moves.
+- **Attacking the player** lets them pick a blocker or take the hit. The site shows the result
+  and either player presses **Apply result**.
 - **End turn** stands the next player's cards, resets their plays and draws their card.
-- Tap a card in hand to play it, play it face down, discard it or move it.
-- Tap a card on the table to rest/stand it, attack, change its stats, mark it (Condemned,
-  Poisoned, Guard Duty), flip it, or move it anywhere.
-- **Attack** asks for the color, then the target. Only rested units that share the color can be
-  chosen. If you attack the player, they pick a blocker or take the hit. The site shows the
-  result and either player presses **Apply result**.
 - Life at 20 or 10 unlocks level 2 or 3 for both players. Playing a card above the unlocked
   level asks for confirmation instead of being blocked, so card effects can still override.
-- Tap the deck chip to draw, mill, look at the top card, search or shuffle.
-- **Soul:** open a card on the table and choose "Put this card into a soul" to slide it under
-  another card. The top card shows "soul N". When the top card leaves the table, its soul goes
-  to the discard pile automatically.
-- The layout is built for a computer screen first: the table on the left, a card reader (hover
-  a card) and the game log on the right. On a phone everything stacks into one column.
+- **Menu** has a die roll, a coin flip, reveal hand, rematch and concede. The log on the right
+  doubles as chat for the two players.
+- Keyboard: **D** draws a card, **E** ends your turn, **Esc** closes a menu. Hovering a card
+  shows it large in the side panel.
 
 ## Known limits
 

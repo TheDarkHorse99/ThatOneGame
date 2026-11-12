@@ -32,7 +32,7 @@ export function normPublic(s) {
 }
 export function normPrivate(v) {
   v = v || {};
-  return { hand: asArray(v.hand), deck: asArray(v.deck), hidden: v.hidden || {} };
+  return { hand: asArray(v.hand), deck: asArray(v.deck), hidden: v.hidden || {}, list: v.list || null, game: v.game || 1 };
 }
 const clean = (v) => JSON.parse(JSON.stringify(v)); // strips undefined, which the database rejects
 

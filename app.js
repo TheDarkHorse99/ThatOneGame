@@ -57,46 +57,57 @@ function statsOf(inst) {
     return has ? (base[i] || 0) + ((inst.m && inst.m[col]) || 0) : null;
   });
 }
-function statChips(values) {
-  if (!values || values.every((v) => v == null)) return null;
-  return h('div', { class: 'stats' }, values.map((v, i) => (v == null ? null : h('span', { class: 'stat s-' + COLS[i], title: COL_NAMES[i] }, v))));
+const GLYPH = { unit: '⚔︎', location: '⛰︎', event: '✦', object: '⚙︎' };
+// Markers shown across the middle of a card on the table.
+function badges(inst) {
+  const list = [];
+  if (inst.h) list.push('hidden');
+  list.push(...inst.tags);
+  if (inst.soul && inst.soul.length) list.push('soul ' + inst.soul.length);
+  if (inst.note) list.push(inst.note);
+  return list.length ? h('div', { class: 'badges' }, list.map((t) => h('span', { class: 'badge' + (t.startsWith('soul ') ? ' soul' : '') }, t))) : null;
 }
-// Small card face. opts: inst (table copy), count (deck builder badge), onclick
+function cardBack() { return h('div', { class: 'card back' }, h('span', { class: 'emblem' }, 'T·O·G')); }
+// A card face. opts: inst (table copy), count (deck builder badge), onclick, drop (drop-zone id), still (not interactive)
 function cardView(card, opts = {}) {
   const inst = opts.inst;
+  const tag = opts.still ? 'div' : 'button';
   if (!card) {
-    return h('button', { class: 'card back' + (inst && inst.r ? ' rested' : ''), onclick: opts.onclick, 'data-iid': inst && inst.i },
-      h('div', { class: 'card-name' }, 'Hidden'), inst && inst.r ? h('div', { class: 'flag' }, 'rested') : null);
+    return h(tag, { class: 'card back', type: opts.still ? null : 'button', onclick: opts.onclick, 'data-iid': inst && inst.i, 'data-drop': opts.drop },
+      h('span', { class: 'emblem' }, 'T·O·G'), inst ? badges(inst) : null);
   }
   const values = inst ? statsOf(inst) : card.stats;
-  const cls = ['card', 't-' + card.type, inst && inst.r ? 'rested' : '', inst && inst.h ? 'facedown' : '', opts.dim ? 'dim' : ''].join(' ');
-  return h('button', { class: cls, onclick: opts.onclick, onmouseenter: () => showPreview(card, inst), 'data-card': card.id, 'data-iid': inst && inst.i },
-    h('div', { class: 'card-top' }, h('span', { class: 'card-name' }, card.name), h('span', { class: 'lv' }, 'Lv' + card.level)),
-    h('div', { class: 'card-type' }, card.type + (card.traits ? ' · ' + card.traits : '')),
-    statChips(values),
-    opts.text === false ? null : h('div', { class: 'card-text' }, card.effect),
-    inst && inst.h ? h('div', { class: 'flag' }, 'hidden') : null,
-    inst && inst.r ? h('div', { class: 'flag' }, 'rested') : null,
-    inst && inst.tags.length ? h('div', { class: 'tags' }, inst.tags.map((t) => h('span', { class: 'tag' }, t))) : null,
-    inst && inst.soul && inst.soul.length ? h('div', { class: 'flag soul' }, 'soul ' + inst.soul.length) : null,
-    inst && inst.note ? h('div', { class: 'note' }, inst.note) : null,
+  const len = card.effect.length > 260 ? ' xlong' : card.effect.length > 150 ? ' long' : '';
+  const cls = `card t-${card.type}${len}${inst && inst.h ? ' facedown' : ''}${opts.dim ? ' dim' : ''}`;
+  return h(tag, { class: cls, type: opts.still ? null : 'button', onclick: opts.onclick, onmouseenter: opts.still ? null : () => showPreview(card, inst), 'data-card': card.id, 'data-iid': inst && inst.i, 'data-drop': opts.drop },
+    h('div', { class: 'c-head' }, h('span', { class: 'c-name' }, card.name), h('span', { class: 'c-lv', title: 'Level ' + card.level }, card.level)),
+    h('div', { class: 'c-art' }, GLYPH[card.type]),
+    h('div', { class: 'c-type' }, card.type + (card.traits ? ' · ' + card.traits : '')),
+    h('div', { class: 'c-text' }, card.effect),
+    values && values.some((v) => v != null) ? h('div', { class: 'c-stats' }, values.map((v, i) => h('span', { class: 'gem s-' + COLS[i] + (v == null ? ' none' : ''), title: COL_NAMES[i] }, v == null ? '' : v))) : null,
+    inst ? badges(inst) : null,
     opts.count ? h('span', { class: 'count' }, '×' + opts.count) : null);
 }
+// Large card plus its full text, used in menus and the side panel.
 function cardDetail(card, inst) {
-  return h('div', { class: 'detail t-' + card.type },
-    h('div', { class: 'detail-head' }, h('strong', {}, card.name), h('span', { class: 'lv' }, 'Level ' + card.level)),
-    h('div', { class: 'card-type' }, card.type + (card.traits ? ' · ' + card.traits : '') + ' · ' + card.set),
-    statChips(inst ? statsOf(inst) : card.stats),
-    card.effect ? h('p', { class: 'detail-text' }, card.effect) : h('p', { class: 'detail-text muted' }, 'No effect.'));
+  const vals = inst ? statsOf(inst) : card.stats;
+  return h('div', { class: 'detail' },
+    h('div', { class: 'detail-card' }, cardView(card, { inst, still: true })),
+    h('div', { class: 'detail-body' },
+      h('strong', { class: 'detail-name' }, card.name),
+      h('div', { class: 'muted' }, `Level ${card.level} ${card.type}${card.traits ? ' · ' + card.traits : ''} · ${card.set}`),
+      vals && vals.some((v) => v != null) ? h('div', { class: 'detail-stats' }, vals.map((v, i) => (v == null ? null : h('span', { class: 'stat-word' }, h('span', { class: 'gem s-' + COLS[i] }, v), COL_NAMES[i])))) : null,
+      h('p', { class: 'detail-text' }, card.effect || 'No effect.')));
 }
 
-// Desktop: hovering a card shows its full text in the side panel of a room.
+// Desktop: hovering a card shows it large in the side panel of a room.
 let preview = null;
 function previewBody() {
   if (!preview) return h('p', { class: 'muted' }, 'Hover over a card to read it here.');
   return cardDetail(preview.card, preview.inst && preview.inst.c ? preview.inst : null);
 }
 function showPreview(card, inst) {
+  if (drag && drag.active) return;
   preview = { card, inst };
   const el = document.querySelector('.preview');
   if (el) el.replaceChildren(previewBody());
@@ -121,6 +132,62 @@ function renderModal() {
     h('div', { class: 'sheet' }, h('button', { class: 'close', onclick: closeModal, 'aria-label': 'Close' }, '×'), body));
   document.body.append(overlay);
 }
+
+// ---------------------------------------------------------------- drag and drop
+// Works with mouse and touch. Drop zones are elements with a data-drop attribute.
+let drag = null;
+let justDragged = false;
+let renderPending = false;
+function dragSource(el, src) {
+  el.classList.add('draggable');
+  el.addEventListener('pointerdown', (e) => {
+    if (e.button || !R.me) return;
+    drag = { src, el, x: e.clientX, y: e.clientY, id: e.pointerId, active: false, ghost: null, over: null };
+  });
+}
+const dropTarget = (x, y) => { const el = document.elementFromPoint(x, y); return el ? el.closest('[data-drop]') : null; };
+window.addEventListener('pointermove', (e) => {
+  if (!drag || e.pointerId !== drag.id) return;
+  if (!drag.active) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+    const card = drag.el.classList.contains('card') ? drag.el : drag.el.querySelector('.card');
+    const g = card.cloneNode(true);
+    g.classList.add('ghost');
+    g.style.setProperty('--card-h', card.offsetHeight + 'px');
+    document.body.append(g);
+    document.body.classList.add('dragging');
+    drag.el.classList.add('drag-origin');
+    Object.assign(drag, { ghost: g, active: true, w: card.offsetWidth, hgt: card.offsetHeight });
+  }
+  drag.ghost.style.transform = `translate(${e.clientX - drag.w / 2}px, ${e.clientY - drag.hgt / 2}px) rotate(3deg)`;
+  const t = dropTarget(e.clientX, e.clientY);
+  if (t !== drag.over) {
+    if (drag.over) drag.over.classList.remove('drop-hover');
+    if (t) t.classList.add('drop-hover');
+    drag.over = t;
+  }
+});
+function endDrag(e, cancelled) {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag;
+  drag = null;
+  if (!d.active) return;
+  d.ghost.remove();
+  document.body.classList.remove('dragging');
+  if (d.over) d.over.classList.remove('drop-hover');
+  d.el.classList.remove('drag-origin');
+  justDragged = true;
+  setTimeout(() => { justDragged = false; }, 150);
+  if (!cancelled) {
+    let t = dropTarget(e.clientX, e.clientY);
+    while (t && !handleDrop(d.src, t.dataset.drop)) t = t.parentElement ? t.parentElement.closest('[data-drop]') : null;
+  }
+  if (renderPending) { renderPending = false; render(); }
+}
+window.addEventListener('pointerup', (e) => endDrag(e, false));
+window.addEventListener('pointercancel', (e) => endDrag(e, true));
+// A drag must not also count as a click on whatever is under the pointer.
+window.addEventListener('click', (e) => { if (justDragged) { e.stopPropagation(); e.preventDefault(); } }, true);
 
 // ---------------------------------------------------------------- card filters (library + deck builder)
 function matches(card, f) {
@@ -353,14 +420,14 @@ const levelOk = (card) => card.level <= R.pub.lv || confirm(`Level ${card.level}
 
 // ---------------------------------------------------------------- room: joining
 function freshPublic(code) {
-  return { v: 1, code, created: Date.now(), started: false, turn: '', turnNo: 0, lv: 1, seats: {},
+  return { v: 1, code, created: Date.now(), game: 1, started: false, turn: '', turnNo: 0, lv: 1, seats: {},
     pl: { p1: { life: 30, hand: 0, deck: 0, plays: 0 }, p2: { life: 30, hand: 0, deck: 0, plays: 0 } }, log: [] };
 }
 function dealPrivate(deck) {
   const list = [];
   for (const [cid, n] of Object.entries(deck.cards)) for (let i = 0; i < n; i++) list.push(cid);
   shuffle(list);
-  return { hand: list.splice(0, 5), deck: list, hidden: {} };
+  return { hand: list.splice(0, 5), deck: list, hidden: {}, list: { ...deck.cards }, game: (R.pub && R.pub.game) || 1 };
 }
 async function createRoom(p) {
   const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -411,6 +478,10 @@ function enterRoom(code) {
     }
     if (seat) R.me = seat;
     watchSpectatorViews();
+    if ((R.pub.game || 1) !== R.gameSeen) { R.gameSeen = R.pub.game || 1; R.hideWin = false; }
+    const turnKey = R.pub.started ? R.pub.turn + R.pub.turnNo : '';
+    if (R.me && turnKey && R.turnKey && turnKey !== R.turnKey && R.pub.turn === R.me) toast('Your turn');
+    R.turnKey = turnKey;
     if (location.hash.startsWith('#/room/')) render();
     processPending();
   });
@@ -426,7 +497,16 @@ async function processPending() {
   if (!R.me || !R.priv || R.working || !R.pub) return;
   const me = R.me;
   const items = R.pub.inbox[me];
-  if (items.length) {
+  if ((R.pub.game || 1) !== (R.priv.game || 1)) {
+    // A rematch was started: shuffle up my deck again and draw a new hand.
+    R.working = true;
+    if (R.priv.list) R.priv = { ...dealPrivate({ cards: R.priv.list }), game: R.pub.game || 1 };
+    else R.priv.game = R.pub.game || 1;
+    await savePriv();
+    await tx(() => {});
+    R.working = false;
+    processPending();
+  } else if (items.length) {
     R.working = true;
     const done = new Set(), toDiscard = [], toRemoved = [];
     let shuffled = false;
@@ -661,9 +741,14 @@ function soulSection(inst, canEdit) {
 }
 
 // ---------------------------------------------------------------- room: combat
-function declareAttack(iid) {
+// target: 'P' (the opposing player), a unit's id, or nothing (ask).
+function declareAttack(iid, target) {
   const s = R.pub;
   const g = findInst(s, iid);
+  if (!g || !g.inst.c) return toast('Flip this card face up before attacking');
+  const vals = statsOf(g.inst);
+  const cols = [0, 1, 2, 3].filter((i) => vals[i] != null);
+  if (!cols.length) return toast('This card has no stats to attack with');
   const warnings = [];
   if (s.turn !== R.me) warnings.push('It is not your turn.');
   if (s.turnNo === 1) warnings.push('The first player cannot attack on their first turn.');
@@ -671,27 +756,38 @@ function declareAttack(iid) {
   if (g.inst.r) warnings.push('This unit is rested.');
   if (g.inst.tags.includes('Guard Duty')) warnings.push('This unit has Guard Duty.');
   if (warnings.length && !confirm(warnings.join(' ') + ' Attack anyway?')) return;
-  let col = -1;
+  let col = cols.length === 1 ? cols[0] : -1;
+  const launch = (tgt) => {
+    if (tgt !== 'P') {
+      const t = findInst(R.pub, tgt);
+      if (!t) return;
+      const v = statsOf(t.inst)[col];
+      const why = !t.inst.r ? 'That unit is stood, and stood units cannot be attacked.' : v == null ? `That unit has no ${COL_NAMES[col]}.` : '';
+      if (why && !confirm(why + ' Attack it anyway?')) return;
+    }
+    closeModal();
+    attack(iid, col, tgt);
+  };
+  if (col >= 0 && target) return launch(target);
   openModal(() => {
     const f = findInst(R.pub, iid);
     if (!f) return null;
-    const vals = statsOf(f.inst);
+    const now = statsOf(f.inst);
     if (col < 0) {
       return h('div', {}, h('h2', {}, `${instName(f.inst)} attacks`), h('p', {}, 'Choose the color for this combat.'),
-        h('div', { class: 'bar' }, vals.map((v, i) => (v == null ? null : h('button', { class: 'btn s-' + COLS[i], onclick: () => { col = i; renderModal(); } }, `${COL_NAMES[i]} ${v}`)))));
+        h('div', { class: 'bar' }, cols.map((i) => h('button', { class: 'btn s-' + COLS[i], onclick: () => { col = i; if (target) launch(target); else renderModal(); } }, `${COL_NAMES[i]} ${now[i]}`))));
     }
     const foe = opp(f.ctrl);
     const targets = R.pub.pl[foe].field.filter((x) => x.c && CARD_BY_ID[x.c].type === 'unit');
-    const go = (tgt) => { closeModal(); attack(iid, col, tgt); };
-    return h('div', {}, h('h2', {}, `${instName(f.inst)} attacks with ${COL_NAMES[col]} ${vals[col]}`), h('p', {}, 'Choose a target. Only rested units that share the color can be attacked.'),
+    return h('div', {}, h('h2', {}, `${instName(f.inst)} attacks with ${COL_NAMES[col]} ${now[col]}`), h('p', {}, 'Choose a target. Only rested units that share the color can be attacked.'),
       h('div', { class: 'list' },
-        btn(`${seatName(foe)} (the player)`, () => go('P'), 'primary'),
+        btn(`${seatName(foe)} (the player)`, () => launch('P'), 'primary'),
         targets.map((x) => {
           const v = statsOf(x)[col];
           const why = !x.r ? 'stood' : v == null ? `no ${COL_NAMES[col]}` : '';
-          return h('button', { class: 'btn', disabled: !!why, onclick: () => go(x.i) }, `${instName(x)} ${why ? '(' + why + ')' : `(${COL_NAMES[col]} ${v})`}`);
+          return h('button', { class: 'btn', disabled: !!why, onclick: () => launch(x.i) }, `${instName(x)} ${why ? '(' + why + ')' : `(${COL_NAMES[col]} ${v})`}`);
         })),
-      btn('Back', () => { col = -1; renderModal(); }));
+      cols.length > 1 ? btn('Back', () => { col = -1; renderModal(); }) : null);
   });
 }
 async function attack(iid, col, tgt) {
@@ -743,6 +839,62 @@ async function applyCombat() {
 }
 const cancelCombat = () => tx((s) => { s.combat = null; }, 'cancelled the combat (no result applied).');
 
+// ---------------------------------------------------------------- room: what a drop means
+// Returns true when the drop was handled. Zones: field:p1, unit:<id>, hand:p1, player:p1, pile:<deck|discard|removed>:p1
+function handleDrop(src, zone) {
+  if (!R.me || !R.pub) return true;
+  const [kind, a, b] = zone.split(':');
+  const me = R.me, foe = opp(me);
+  if (src.k === 'hand') {
+    const onMyUnit = kind === 'unit' && findInst(R.pub, a) && findInst(R.pub, a).ctrl === me;
+    if ((kind === 'field' && a === me) || onMyUnit) { playFromHand(src.idx, false); return true; }
+    if (kind === 'pile' && b === me && a === 'discard') { handTo(src.idx, 'discard'); return true; }
+    if (kind === 'pile' && b === me && a === 'deck') { handTo(src.idx, 'deckTop'); return true; }
+    return false;
+  }
+  if (src.k === 'deck') {
+    if (kind === 'hand' && a === me) { draw(1); return true; }
+    if (kind === 'pile' && a === 'discard' && b === me) { mill(1); return true; }
+    return false;
+  }
+  const g = findInst(R.pub, src.iid);
+  if (!g) return true;
+  const isUnit = (x) => !!x.c && CARD_BY_ID[x.c].type === 'unit';
+  const myAttacker = g.ctrl === me && isUnit(g.inst);
+  if (kind === 'unit') {
+    const t = findInst(R.pub, a);
+    if (t && a !== src.iid && myAttacker && t.ctrl === foe && isUnit(t.inst)) { declareAttack(src.iid, a); return true; }
+    return false;
+  }
+  if (kind === 'player') { if (a === foe && myAttacker) { declareAttack(src.iid, 'P'); return true; } return false; }
+  if (kind === 'hand') {
+    if (a === foe && myAttacker && g.inst.o === me) declareAttack(src.iid, 'P');
+    else fieldTo(src.iid, 'hand', 'returned to hand:');
+    return true;
+  }
+  if (kind === 'field') {
+    if (a !== g.ctrl) editInst(src.iid, (x, s, f) => { s.pl[f.ctrl].field.splice(f.idx, 1); s.pl[opp(f.ctrl)].field.push(x); }, (x) => `changed control of ${instName(x)}.`);
+    return true;
+  }
+  if (kind === 'pile') {
+    if (a === 'removed') fieldTo(src.iid, 'removed', 'removed from play:');
+    else if (a === 'deck') fieldTo(src.iid, 'deckTop', 'put on top of the deck:');
+    else if (isUnit(g.inst)) killOrSend(src.iid);
+    else fieldTo(src.iid, 'discard', 'sent to the discard pile:');
+    return true;
+  }
+  return false;
+}
+// "Kill" and "send to the discard pile" are different things in the rules, so ask.
+function killOrSend(iid) {
+  openModal(() => {
+    const f = findInst(R.pub, iid);
+    if (!f) return null;
+    return h('div', {}, h('h2', {}, `${instName(f.inst)} goes to the discard pile`), h('p', { class: 'muted' }, 'A killed unit has died. A unit that is sent to the discard pile has not.'),
+      h('div', { class: 'bar' }, btn('Kill', () => fieldTo(iid, 'discard', 'killed'), 'danger'), btn('Send to discard pile', () => fieldTo(iid, 'discard', 'sent to the discard pile:'))));
+  });
+}
+
 // ---------------------------------------------------------------- room: menus
 function fieldMenu(iid) {
   let picking = false;
@@ -752,7 +904,7 @@ function fieldMenu(iid) {
     const inst = f.inst;
     const myHidden = !inst.c && R.me && R.priv && R.priv.hidden[iid];
     const card = CARD_BY_ID[inst.c || secretOf(inst)];
-    const head = card ? cardDetail(card, inst.c ? inst : null) : h('div', { class: 'detail' }, h('strong', {}, 'Hidden card'), h('p', { class: 'muted' }, 'Face down. Only its owner and spectators know what it is.'));
+    const head = card ? cardDetail(card, inst.c ? inst : null) : h('div', { class: 'detail' }, h('div', { class: 'detail-card' }, cardBack()), h('div', { class: 'detail-body' }, h('strong', { class: 'detail-name' }, 'Hidden card'), h('p', { class: 'muted' }, 'Face down. Only its owner and spectators know what it is.')));
     if (!R.me) return h('div', {}, head, !inst.c && card ? h('p', { class: 'muted' }, 'This card is face down. The other player cannot see it.') : null, soulSection(inst, false));
     if (picking) {
       const others = ['p1', 'p2'].flatMap((p) => R.pub.pl[p].field).filter((x) => x.i !== iid);
@@ -762,28 +914,29 @@ function fieldMenu(iid) {
     }
     const isUnit = card && card.type === 'unit' && inst.c;
     const vals = statsOf(inst);
-    const stat = (i) => h('div', { class: 'stat-edit' }, h('span', { class: 'stat s-' + COLS[i] }, vals[i] == null ? '–' : vals[i]),
+    const stat = (i) => h('div', { class: 'stat-edit' }, h('span', { class: 'gem s-' + COLS[i] }, vals[i] == null ? '' : vals[i]),
       vals[i] == null
         ? btn('add ' + COL_NAMES[i], () => editInst(iid, (x) => { x.add += COLS[i]; }, (x) => `gave ${instName(x)} ${COL_NAMES[i]} 0.`), 'tiny')
         : [btn('−', () => editInst(iid, (x) => { x.m[COLS[i]] = (x.m[COLS[i]] || 0) - 1; }, (x) => `${instName(x)}: ${COL_NAMES[i]} −1.`), 'tiny'),
            btn('+', () => editInst(iid, (x) => { x.m[COLS[i]] = (x.m[COLS[i]] || 0) + 1; }, (x) => `${instName(x)}: ${COL_NAMES[i]} +1.`), 'tiny')]);
     const send = (label, dest, verb, cls) => btn(label, () => fieldTo(iid, dest, verb), cls);
+    const group = (title, open, ...kids) => h('details', { open }, h('summary', {}, title), kids);
     return h('div', {}, head, myHidden ? h('p', { class: 'muted' }, 'This card is face down. Your opponent cannot see it.') : null,
       h('div', { class: 'bar' },
         btn(inst.r ? 'Stand' : 'Rest', () => editInst(iid, (x) => { x.r = !x.r; }, (x) => `${x.r ? 'stood' : 'rested'} ${instName(x)}.`), 'primary'),
         isUnit && f.ctrl === R.me ? btn('Attack', () => { closeModal(); declareAttack(iid); }, 'primary') : null,
         myHidden ? btn('Flip face up (Ambush)', () => flipUp(iid), 'primary') : null,
-        inst.c && inst.o === R.me ? btn('Turn face down', () => flipDown(iid)) : null,
-        btn(f.ctrl === R.me ? 'Give control to opponent' : 'Take control', () => editInst(iid, (x, s, g) => { s.pl[g.ctrl].field.splice(g.idx, 1); s.pl[opp(g.ctrl)].field.push(x); }, (x) => `changed control of ${instName(x)}.`))),
-      isUnit ? h('div', {}, h('h3', {}, 'Stats'), h('div', { class: 'stat-row' }, [0, 1, 2, 3].map(stat))) : null,
-      h('h3', {}, 'Markers'),
-      h('div', { class: 'bar' }, TAGS.map((t) => h('button', { class: 'btn' + (inst.tags.includes(t) ? ' on' : ''), onclick: () => editInst(iid, (x) => { x.tags = x.tags.includes(t) ? x.tags.filter((y) => y !== t) : [...x.tags, t]; }, (x) => (x.tags.includes(t) ? `removed the ${t} marker from ${instName(x)}.` : `marked ${instName(x)} as ${t}.`)) }, t)),
-        btn('Note', () => { const n = prompt('Note shown on this card (leave empty to clear)', inst.note || ''); if (n != null) editInst(iid, (x) => { x.note = n.slice(0, 40); }); })),
-      soulSection(inst, true),
-      h('div', { class: 'bar' }, btn('Put this card into a soul', () => { picking = true; renderModal(); }), inst.soul.length ? btn('Send whole soul to discard pile', () => soulToDiscard(iid)) : null),
-      h('h3', {}, 'Move'),
-      h('div', { class: 'bar' }, send('Kill', 'discard', 'killed', 'danger'), send('Send to discard pile', 'discard', 'sent to the discard pile:'), send('Return to hand', 'hand', 'returned to hand:'),
-        send('Deck top', 'deckTop', 'put on top of the deck:'), send('Deck bottom', 'deckBottom', 'put on the bottom of the deck:'), send('Shuffle into deck', 'deckShuffle', 'shuffled into the deck:'), send('Remove from play', 'removed', 'removed from play:')));
+        inst.c && inst.o === R.me ? btn('Turn face down', () => flipDown(iid)) : null),
+      isUnit ? group('Change stats', true, h('div', { class: 'stat-row' }, [0, 1, 2, 3].map(stat))) : null,
+      group('Markers', inst.tags.length > 0,
+        h('div', { class: 'bar' }, TAGS.map((t) => h('button', { class: 'btn' + (inst.tags.includes(t) ? ' on' : ''), onclick: () => editInst(iid, (x) => { x.tags = x.tags.includes(t) ? x.tags.filter((y) => y !== t) : [...x.tags, t]; }, (x) => (x.tags.includes(t) ? `removed the ${t} marker from ${instName(x)}.` : `marked ${instName(x)} as ${t}.`)) }, t)),
+          btn('Note', () => { const n = prompt('Note shown on this card (leave empty to clear)', inst.note || ''); if (n != null) editInst(iid, (x) => { x.note = n.slice(0, 40); }); }))),
+      group(`Soul (${inst.soul.length})`, inst.soul.length > 0, soulSection(inst, true),
+        h('div', { class: 'bar' }, btn('Put this card into a soul', () => { picking = true; renderModal(); }), inst.soul.length ? btn('Send whole soul to discard pile', () => soulToDiscard(iid)) : null)),
+      group('Move (or drag the card)', false,
+        h('div', { class: 'bar' }, send('Kill', 'discard', 'killed', 'danger'), send('Send to discard pile', 'discard', 'sent to the discard pile:'), send('Return to hand', 'hand', 'returned to hand:'),
+          send('Deck top', 'deckTop', 'put on top of the deck:'), send('Deck bottom', 'deckBottom', 'put on the bottom of the deck:'), send('Shuffle into deck', 'deckShuffle', 'shuffled into the deck:'), send('Remove from play', 'removed', 'removed from play:'),
+          btn(f.ctrl === R.me ? 'Give control to opponent' : 'Take control', () => editInst(iid, (x, s, g) => { s.pl[g.ctrl].field.splice(g.idx, 1); s.pl[opp(g.ctrl)].field.push(x); }, (x) => `changed control of ${instName(x)}.`)))));
   });
 }
 function handMenu(idx) {
@@ -792,8 +945,9 @@ function handMenu(idx) {
     if (R.priv.hand[idx] !== cid) return null;
     const card = CARD_BY_ID[cid];
     return h('div', {}, cardDetail(card),
-      h('div', { class: 'bar' }, btn(card.type === 'event' ? 'Play event' : 'Play', () => playFromHand(idx, false), 'primary'), btn('Play face down (Hide)', () => playFromHand(idx, true))),
-      h('div', { class: 'bar' }, btn('Discard', () => handTo(idx, 'discard')), btn('Deck top', () => handTo(idx, 'deckTop')), btn('Deck bottom', () => handTo(idx, 'deckBottom')), btn('Shuffle into deck', () => handTo(idx, 'deckShuffle')), btn('Put in opponent\'s hand', () => handTo(idx, 'give'))));
+      h('div', { class: 'bar' }, btn(card.type === 'event' ? 'Play event' : 'Play', () => playFromHand(idx, false), 'primary'), btn('Play face down (Hide)', () => playFromHand(idx, true)), btn('Discard', () => handTo(idx, 'discard'))),
+      h('details', {}, h('summary', {}, 'More'),
+        h('div', { class: 'bar' }, btn('Deck top', () => handTo(idx, 'deckTop')), btn('Deck bottom', () => handTo(idx, 'deckBottom')), btn('Shuffle into deck', () => handTo(idx, 'deckShuffle')), btn('Put in opponent\'s hand', () => handTo(idx, 'give')))));
   });
 }
 function pileMenu(p, pile) {
@@ -808,7 +962,7 @@ function pileMenu(p, pile) {
       return h('div', {}, cardDetail(card), p === R.me ? h('div', { class: 'bar' }, mv('Play to field', 'field'), mv('To hand', 'hand'), mv('Shuffle into deck', 'deckShuffle'), pile === 'discard' ? mv('Remove from play', 'removed') : mv('To discard pile', 'discard')) : null,
         btn('Back', () => { picked = -1; renderModal(); }));
     }
-    return h('div', {}, h('h2', {}, title), list.length ? h('div', { class: 'grid' }, list.map((cid, i) => cardView(CARD_BY_ID[cid], { text: false, onclick: () => { picked = i; renderModal(); } })).reverse()) : h('p', { class: 'muted' }, 'Empty.'));
+    return h('div', {}, h('h2', {}, title), list.length ? h('div', { class: 'grid' }, list.map((cid, i) => cardView(CARD_BY_ID[cid], { onclick: () => { picked = i; renderModal(); } })).reverse()) : h('p', { class: 'muted' }, 'Empty.'));
   });
 }
 function deckMenu() {
@@ -831,10 +985,10 @@ function deckMenu() {
       return h('div', {}, h('h2', {}, 'Top card of your deck'), cardDetail(CARD_BY_ID[cid]),
         h('div', { class: 'bar' }, btn('Leave on top', closeModal, 'primary'), btn('Put on bottom', async () => { await deckTo(cid, 'deckBottom'); closeModal(); }), btn('Draw it', async () => { closeModal(); await draw(1); })));
     }
-    const n = (label, fn) => btn(label, async () => { closeModal(); await fn(); });
+    const n = (label, fn, cls) => btn(label, async () => { closeModal(); await fn(); }, cls);
     return h('div', {}, h('h2', {}, `Your deck (${deck.length})`),
-      h('div', { class: 'bar' }, n('Draw 1', () => draw(1)), n('Draw 2', () => draw(2)), n('Mill 1', () => mill(1)), n('Mill 3', () => mill(3)), n('Mill 5', () => mill(5))),
-      h('div', { class: 'bar' }, btn('Look at top card', async () => { await tx(() => {}, 'looked at the top card of their deck.'); mode = 'top'; renderModal(); }), btn('Search deck', () => { mode = 'search'; searched = true; renderModal(); }), n('Shuffle', () => shuffleDeck()), n('Reveal hand to everyone', revealHand)));
+      h('div', { class: 'bar' }, n('Draw 1', () => draw(1), 'primary'), n('Draw 2', () => draw(2)), n('Mill 1', () => mill(1)), n('Mill 3', () => mill(3)), n('Mill 5', () => mill(5))),
+      h('div', { class: 'bar' }, btn('Look at top card', async () => { await tx(() => {}, 'looked at the top card of their deck.'); mode = 'top'; renderModal(); }), btn('Search deck', () => { mode = 'search'; searched = true; renderModal(); }), n('Shuffle', () => shuffleDeck())));
   }, finish);
 }
 function lifeMenu(p) {
@@ -842,42 +996,84 @@ function lifeMenu(p) {
     h('div', { class: 'bar' }, [-5, -3, -1, 1, 3, 5].map((d) => btn((d > 0 ? '+' : '−') + Math.abs(d), () => changeLife(p, d), d < 0 ? 'danger' : ''))),
     btn('Other amount', () => { const v = Number(prompt('Change life by (use a minus sign to lose life)', '-2')); if (v) changeLife(p, Math.trunc(v)); })));
 }
+async function rematch() {
+  if (!confirm('Start a new game in this room? Both players keep their decks.')) return;
+  closeModal();
+  await tx((s) => {
+    s.game = (s.game || 1) + 1;
+    Object.assign(s, { started: false, turn: '', turnNo: 0, lv: 1, combat: null, needDraw: '', conceded: '' });
+    for (const p of ['p1', 'p2']) { s.pl[p] = { life: 30, hand: 0, deck: 0, plays: 0, field: [], discard: [], removed: [] }; s.inbox[p] = []; }
+  }, 'started a rematch.');
+}
+function roomMenu() {
+  const act = (label, fn, cls) => btn(label, () => { closeModal(); fn(); }, cls);
+  openModal(() => h('div', {}, h('h2', {}, 'Game menu'),
+    h('div', { class: 'bar' },
+      act('Roll a die', () => tx(() => {}, `rolled a ${1 + Math.floor(Math.random() * 6)} on a six-sided die.`)),
+      act('Flip a coin', () => tx(() => {}, `flipped a coin: ${Math.random() < 0.5 ? 'heads' : 'tails'}.`)),
+      act('Reveal my hand', revealHand)),
+    h('div', { class: 'bar' }, btn('Rematch', rematch), act('Concede', () => { if (confirm('Concede this game?')) tx((s) => { s.conceded = R.me; }, 'conceded the game.'); }, 'danger')),
+    h('div', { class: 'bar' }, h('a', { class: 'btn', href: '#/library', target: '_blank' }, 'Card library'), h('a', { class: 'btn', href: '#/decks', target: '_blank' }, 'Deck builder'), h('a', { class: 'btn', href: '#/' }, 'Leave room')),
+    h('p', { class: 'muted' }, 'Drag cards to play, attack and move them. Tap a card for everything else. On a keyboard: D draws a card, E ends your turn, Esc closes a menu.')));
+}
 
-// ---------------------------------------------------------------- room: table
-function pileChip(label, n, onclick) { return h('button', { class: 'chip', onclick }, h('span', { class: 'chip-n' }, n), label); }
-function playerStrip(p, isMe) {
+// ---------------------------------------------------------------- room: the table
+let sideOpen = false;
+function infoPanel(p) {
   const d = R.pub.pl[p];
   const turn = R.pub.started && R.pub.turn === p;
-  return h('div', { class: 'strip' + (turn ? ' active' : ''), 'data-seat': p },
-    h('div', { class: 'who' }, h('strong', {}, seatName(p)), isMe ? h('span', { class: 'muted' }, ' (you)') : null, turn ? h('span', { class: 'turn-flag' }, 'their turn') : null),
-    h('button', { class: 'life', 'data-life': p, disabled: !R.me, onclick: () => lifeMenu(p) }, h('span', { class: 'life-n' }, d.life), ' life'),
-    h('div', { class: 'chips' },
-      pileChip('hand', d.hand, null),
-      pileChip('deck', d.deck, isMe ? deckMenu : null),
-      pileChip('discard', d.discard.length, () => pileMenu(p, 'discard')),
-      pileChip('removed', d.removed.length, () => pileMenu(p, 'removed')),
-      turn ? h('span', { class: 'chip' }, h('span', { class: 'chip-n' }, d.plays || 0), 'plays used',
-        isMe ? [btn('−', () => tx((s) => { s.pl[p].plays = Math.max(0, (s.pl[p].plays || 0) - 1); }), 'tiny'), btn('+', () => tx((s) => { s.pl[p].plays = (s.pl[p].plays || 0) + 1; }), 'tiny')] : null) : null),
-    isMe && turn ? btn('End turn', endTurn, 'primary end-turn') : null);
+  return h('div', { class: 'info' + (turn ? ' active' : ''), 'data-drop': 'player:' + p, 'data-seat': p },
+    h('div', { class: 'info-name' }, seatName(p), p === R.me ? h('span', { class: 'you' }, ' (you)') : null),
+    h('button', { class: 'life', 'data-life': p, disabled: !R.me, onclick: () => lifeMenu(p), title: 'Change life' }, h('span', { class: 'life-n' }, d.life), h('span', { class: 'life-l' }, 'life')));
 }
-// Spectators see each player's hand under that player's name.
-function spectatorHand(p) {
-  if (!spectating() || !R.pub.seats[p]) return null;
-  const hand = R.spec[p] ? R.spec[p].hand : [];
-  return h('section', { class: 'hand spec-hand', 'data-spec-hand': p }, h('h2', {}, `${seatName(p)}'s hand (${hand.length})`),
-    h('div', { class: 'hand-row' }, hand.map((cid) => cardView(CARD_BY_ID[cid], { onclick: () => openModal(() => cardDetail(CARD_BY_ID[cid])) })), hand.length ? null : h('p', { class: 'muted' }, 'No cards in hand.')));
+function handZone(p, pos) {
+  const isMe = p === R.me;
+  let cards;
+  if (isMe && R.priv) {
+    cards = R.priv.hand.map((cid, i) => { const el = cardView(CARD_BY_ID[cid], { onclick: () => handMenu(i) }); dragSource(el, { k: 'hand', idx: i }); return el; });
+  } else if (spectating() && R.spec[p]) {
+    cards = R.spec[p].hand.map((cid) => cardView(CARD_BY_ID[cid], { onclick: () => openModal(() => cardDetail(CARD_BY_ID[cid])) }));
+  } else {
+    cards = Array.from({ length: R.pub.seats[p] ? R.pub.pl[p].hand : 0 }, cardBack);
+  }
+  return h('div', { class: `zone hand-zone ${pos}${isMe ? ' mine' : ''}`, 'data-drop': 'hand:' + p, 'data-hand': p }, cards.map((c) => h('div', { class: 'slot' }, c)));
 }
-function fieldRow(p) {
-  const cards = R.pub.pl[p].field;
-  const view = (inst) => {
-    const card = CARD_BY_ID[inst.c || secretOf(inst)];
-    return cardView(card, { inst, onclick: () => fieldMenu(inst.i) });
-  };
-  const isLoc = (x) => x.c && CARD_BY_ID[x.c].type === 'location';
-  const loc = cards.find(isLoc);
-  return h('div', { class: 'field', 'data-field': p },
-    h('div', { class: 'loc-slot' }, loc ? view(loc) : h('div', { class: 'empty-slot' }, 'No location')),
-    h('div', { class: 'units' }, cards.filter((x) => x !== loc).map(view), cards.length - (loc ? 1 : 0) ? null : h('div', { class: 'empty-slot wide' }, 'No cards in play')));
+function tableCard(inst) {
+  const card = CARD_BY_ID[inst.c || secretOf(inst)];
+  const el = cardView(card, { inst, drop: 'unit:' + inst.i, onclick: () => fieldMenu(inst.i) });
+  if (R.me) dragSource(el, { k: 'field', iid: inst.i });
+  return h('div', { class: 'slot' + (inst.r ? ' rested' : '') }, el);
+}
+const isLocation = (x) => !!x.c && CARD_BY_ID[x.c].type === 'location';
+function locSlot(p) {
+  const loc = R.pub.pl[p].field.find(isLocation);
+  return h('div', { class: 'zone loc', 'data-drop': 'field:' + p }, loc ? tableCard(loc) : h('div', { class: 'card empty' }, 'Location'));
+}
+function unitsZone(p) {
+  const cards = R.pub.pl[p].field.filter((x) => !isLocation(x));
+  return h('div', { class: 'zone units', 'data-drop': 'field:' + p, 'data-field': p }, cards.map(tableCard));
+}
+function piles(p) {
+  const d = R.pub.pl[p];
+  const isMe = p === R.me;
+  const top = d.discard.length ? CARD_BY_ID[d.discard[d.discard.length - 1]] : null;
+  const deck = h('button', { class: 'pile', type: 'button', 'data-drop': `pile:deck:${p}`, 'data-pile': 'deck', disabled: !isMe, onclick: isMe ? deckMenu : null, title: 'Deck' }, cardBack(), h('span', { class: 'pile-n' }, d.deck));
+  if (isMe) dragSource(deck, { k: 'deck' });
+  return h('div', { class: 'piles' }, deck,
+    h('button', { class: 'pile', type: 'button', 'data-drop': `pile:discard:${p}`, 'data-pile': 'discard', onclick: () => pileMenu(p, 'discard'), title: 'Discard pile' }, top ? cardView(top, { still: true }) : h('div', { class: 'card empty' }, 'Discard'), h('span', { class: 'pile-n' }, d.discard.length)),
+    h('button', { class: 'removed', type: 'button', 'data-drop': `pile:removed:${p}`, 'data-pile': 'removed', onclick: () => pileMenu(p, 'removed'), title: 'Removed from play' }, 'Out ', h('strong', {}, d.removed.length)));
+}
+function midBar() {
+  const s = R.pub;
+  if (!s.started) return h('div', { class: 'mid' });
+  const d = s.pl[s.turn];
+  const mine = s.turn === R.me;
+  const emptyDeck = ['p1', 'p2'].find((p) => s.seats[p] && s.pl[p].deck === 0);
+  return h('div', { class: 'mid' + (mine ? ' mine' : '') },
+    h('span', {}, mine ? 'Your turn' : `${seatName(s.turn)}'s turn`), h('span', { class: 'muted' }, `Turn ${s.turnNo}`),
+    h('span', { class: 'plays' }, 'Plays used ', h('strong', { 'data-plays': '' }, d.plays || 0),
+      mine ? [btn('−', () => tx((x) => { x.pl[R.me].plays = Math.max(0, (x.pl[R.me].plays || 0) - 1); }), 'tiny'), btn('+', () => tx((x) => { x.pl[R.me].plays = (x.pl[R.me].plays || 0) + 1; }), 'tiny')] : null),
+    emptyDeck ? h('span', { class: 'warn' }, `${seatName(emptyDeck)}'s deck is empty`) : null);
 }
 function combatPanel() {
   const s = R.pub, c = s.combat;
@@ -887,24 +1083,55 @@ function combatPanel() {
   const def = opp(c.ak);
   if (c.st === 'block') {
     const head = `${s.seats[c.ak].name} attacks ${s.seats[def].name} with ${instName(A.inst)} (${COL_NAMES[c.col]} ${statsOf(A.inst)[c.col]}).`;
-    if (R.me !== def) return h('div', { class: 'combat' }, h('p', {}, head), h('p', { class: 'muted' }, `Waiting for ${s.seats[def].name} to block or not.`), R.me ? btn('Cancel combat', cancelCombat) : null);
+    if (R.me !== def) return h('div', { class: 'prompt combat' }, h('p', {}, head), h('p', { class: 'muted' }, `Waiting for ${s.seats[def].name} to block or not.`), R.me ? btn('Cancel combat', cancelCombat) : null);
     const list = blockers(s);
-    return h('div', { class: 'combat mine' }, h('p', {}, head), h('p', {}, 'Block with a stood unit, or take the hit.'),
+    return h('div', { class: 'prompt combat mine' }, h('p', {}, head), h('p', {}, 'Block with a stood unit, or take the hit.'),
       h('div', { class: 'bar' }, list.map((x) => { const v = statsOf(x)[c.col]; return btn(`Block with ${instName(x)} (${v == null ? 'counts as 0' : COL_NAMES[c.col] + ' ' + v})`, () => chooseBlock(x.i), 'primary'); }),
         btn("Don't block", () => chooseBlock(''), 'danger')));
   }
   const o = outcome(s);
-  return h('div', { class: 'combat' }, h('p', {}, o ? o.text : 'A card in this combat has left play.'),
+  return h('div', { class: 'prompt combat' }, h('p', {}, o ? o.text : 'A card in this combat has left play.'),
     R.me ? h('div', { class: 'bar' }, btn('Apply result', applyCombat, 'primary'), btn('Cancel combat', cancelCombat)) : null,
-    R.me ? h('p', { class: 'muted' }, 'Change stats or use effects first if needed. The result updates as stats change.') : null);
+    R.me ? h('p', { class: 'muted' }, 'Change stats or use effects first if needed.') : null);
 }
-function joinPanel() {
+// The one prompt shown in the middle of the table: join, pre-game, winner or combat.
+function centerPrompt() {
   const s = R.pub;
-  if (R.me || R.watching) return null;
-  if (s.seats.p1 && s.seats.p2) return h('p', { class: 'notice' }, 'You are watching as a spectator. You can see both hands and face-down cards, but not the decks.');
-  const setup = playerSetup();
-  return h('section', { class: 'panel' }, h('h2', {}, 'Join this room'), setup.el,
-    h('div', { class: 'bar' }, btn('Join as player', async () => { const p = setup.read(); if (p) await takeSeat(p); }, 'primary'), btn('Just watch', () => { R.watching = true; render(); })));
+  if (!R.me && !R.watching && !(s.seats.p1 && s.seats.p2)) {
+    const setup = playerSetup();
+    return h('div', { class: 'prompt' }, h('h2', {}, 'Join this room'), setup.el,
+      h('div', { class: 'bar' }, btn('Join as player', async () => { const p = setup.read(); if (p) await takeSeat(p); }, 'primary'), btn('Just watch', () => { R.watching = true; render(); })));
+  }
+  const loser = s.conceded || ['p1', 'p2'].find((p) => s.pl[p].life <= 0);
+  if (loser && !R.hideWin) {
+    return h('div', { class: 'prompt win' }, h('h2', {}, `${seatName(opp(loser))} wins`), h('p', {}, s.conceded ? `${seatName(loser)} conceded.` : `${seatName(loser)} is at 0 life.`),
+      h('div', { class: 'bar' }, R.me ? btn('Rematch', rematch, 'primary') : null, btn('Keep looking at the table', () => { R.hideWin = true; render(); })));
+  }
+  if (!s.started) {
+    if (!(s.seats.p1 && s.seats.p2)) {
+      return h('div', { class: 'prompt' }, h('h2', {}, 'Waiting for a second player'), h('p', {}, 'Share the code ', h('strong', { class: 'code' }, s.code), ' or the invite link.'),
+        R.me && !R.pub.pl[R.me].mull ? h('div', { class: 'bar' }, btn('Mulligan (once)', mulligan)) : null);
+    }
+    return h('div', { class: 'prompt' }, h('h2', {}, 'Both players are here'),
+      R.me ? h('div', { class: 'bar' }, btn('Start game', startGame, 'primary'), R.pub.pl[R.me].mull ? null : btn('Mulligan (once)', mulligan)) : h('p', { class: 'muted' }, 'Waiting for the players to start.'));
+  }
+  return combatPanel();
+}
+function sendChat(input) {
+  const text = input.value.trim().slice(0, 200);
+  if (!text) return;
+  input.value = '';
+  net.txPublic(R.code, (s) => { s.log.push({ w: s.seats[R.me].name, m: text, chat: true }); if (s.log.length > 60) s.log = s.log.slice(-60); });
+}
+function sidePanel() {
+  const s = R.pub;
+  const chat = h('input', { class: 'chat', placeholder: 'Say something', maxlength: 200, 'aria-label': 'Chat message', onkeydown: (e) => { if (e.key === 'Enter') sendChat(e.target); } });
+  return h('aside', { class: 'side' + (sideOpen ? ' open' : '') },
+    h('button', { class: 'close side-close', onclick: () => { sideOpen = false; render(); }, 'aria-label': 'Close log' }, '×'),
+    h('div', { class: 'preview' }, previewBody()),
+    h('section', { class: 'log' },
+      h('ol', {}, [...s.log].reverse().map((e) => h('li', { class: e.chat ? 'chat-line' : '' }, e.w ? h('strong', {}, e.w + (e.chat ? ': ' : ' ')) : null, e.m, e.c && CARD_BY_ID[e.c] ? h('button', { class: 'linkish', onclick: () => openModal(() => cardDetail(CARD_BY_ID[e.c])) }, 'view') : null)))),
+    R.me ? chat : null);
 }
 function viewRoom() {
   if (R.missing) return h('main', {}, h('h1', {}, 'Room not found'), h('p', {}, `There is no room with the code ${R.code}.`), h('a', { class: 'btn', href: '#/' }, 'Back to home'));
@@ -913,31 +1140,29 @@ function viewRoom() {
   const bottom = R.me || 'p1';
   const top = opp(bottom);
   const link = location.origin + location.pathname + '#/room/' + s.code;
-  const loser = ['p1', 'p2'].find((p) => s.pl[p].life <= 0);
-  const emptyDeck = s.started ? ['p1', 'p2'].find((p) => s.seats[p] && s.pl[p].deck === 0) : null;
+  const myTurn = s.started && s.turn === R.me;
   return h('main', { class: 'room' },
-    h('div', { class: 'room-bar' },
-      h('span', {}, 'Room ', h('strong', { class: 'code' }, s.code)),
-      btn('Copy invite link', () => { navigator.clipboard?.writeText(link).then(() => toast('Invite link copied'), () => prompt('Copy this link', link)); }),
-      h('span', { class: 'lvl' }, 'Level ', h('strong', {}, s.lv), ' unlocked'),
-      s.started ? h('span', { class: 'muted' }, 'Turn ' + s.turnNo) : null,
-      !R.me ? h('span', { class: 'tag' }, 'Spectating') : null),
-    modeNote(), joinPanel(),
-    loser ? h('p', { class: 'banner' }, `${seatName(loser)} is at 0 life. ${seatName(opp(loser))} wins.`) : null,
-    emptyDeck && !loser ? h('p', { class: 'notice' }, `${seatName(emptyDeck)}'s deck is empty. They lose unless a card says otherwise.`) : null,
-    !s.started ? h('section', { class: 'panel' },
-      s.seats.p1 && s.seats.p2
-        ? [h('p', {}, 'Both players are here.'), R.me ? h('div', { class: 'bar' }, btn('Start game', startGame, 'primary'), mine().mull ? null : btn('Mulligan (once)', mulligan)) : h('p', { class: 'muted' }, 'Waiting for the players to start.')]
-        : [h('p', {}, 'Waiting for a second player. Share the code ', h('strong', { class: 'code' }, s.code), ' or the invite link.'), R.me && !mine().mull ? btn('Mulligan (once)', mulligan) : null]) : null,
-    h('div', { class: 'room-grid' },
-      h('div', { class: 'table' },
-        playerStrip(top, false), spectatorHand(top), fieldRow(top), combatPanel(), fieldRow(bottom), playerStrip(bottom, !!R.me), spectatorHand(bottom),
-        R.me && R.priv ? h('section', { class: 'hand' }, h('h2', {}, `Your hand (${R.priv.hand.length})`),
-          h('div', { class: 'hand-row' }, R.priv.hand.map((cid, i) => cardView(CARD_BY_ID[cid], { onclick: () => handMenu(i) })), R.priv.hand.length ? null : h('p', { class: 'muted' }, 'No cards in hand.'))) : null),
-      h('aside', { class: 'side' },
-        h('section', { class: 'preview-wrap' }, h('h2', {}, 'Card'), h('div', { class: 'preview' }, previewBody())),
-        h('section', { class: 'log' }, h('h2', {}, 'Game log'),
-          h('ol', {}, [...s.log].reverse().map((e) => h('li', {}, e.w ? h('strong', {}, e.w + ' ') : null, e.m, e.c && CARD_BY_ID[e.c] ? h('button', { class: 'linkish', onclick: () => openModal(() => cardDetail(CARD_BY_ID[e.c])) }, ' view card') : null)))))));
+    h('header', { class: 'room-top' },
+      h('a', { class: 'brand', href: '#/' }, 'That One Game'),
+      h('span', { class: 'room-code' }, 'Room ', h('strong', { class: 'code' }, s.code)),
+      btn('Copy invite link', () => { navigator.clipboard?.writeText(link).then(() => toast('Invite link copied'), () => prompt('Copy this link', link)); }, 'small'),
+      h('span', { class: 'lvl', title: `Level ${s.lv} is unlocked for both players`, 'data-level': s.lv }, 'Level', [1, 2, 3].map((n) => h('span', { class: 'pip' + (s.lv >= n ? ' on' : '') }, n))),
+      spectating() ? h('span', { class: 'tag' }, 'Spectating') : null,
+      net.mode !== 'online' ? h('span', { class: 'tag', title: net.error || 'Rooms only work between tabs of this browser' }, 'Practice mode') : null,
+      h('span', { class: 'spacer' }),
+      R.me ? btn('Menu', roomMenu, 'small') : null,
+      btn('Log', () => { sideOpen = !sideOpen; render(); }, 'small log-toggle')),
+    h('div', { class: 'mat-wrap' },
+      h('div', { class: 'mat' },
+        infoPanel(top), handZone(top, 'top'), h('div', { class: 'corner' }),
+        locSlot(top), unitsZone(top), piles(top),
+        midBar(),
+        locSlot(bottom), unitsZone(bottom), piles(bottom),
+        infoPanel(bottom), handZone(bottom, 'bottom'),
+        h('div', { class: 'corner' }, R.me ? h('button', { class: 'btn primary end-turn', disabled: !myTurn, onclick: endTurn }, myTurn ? 'End turn' : 'Waiting') : null),
+        h('div', { class: 'mat-overlay' }, centerPrompt())),
+      sidePanel()),
+    h('div', { class: 'rotate-note' }, h('div', {}, h('strong', {}, 'Rotate your phone sideways'), h('p', {}, 'The table is laid out for a wide screen.'))));
 }
 
 // ---------------------------------------------------------------- router
@@ -946,21 +1171,33 @@ function nav() {
   return h('nav', {}, h('a', { class: 'brand', href: '#/' }, 'That One Game'), link('#/library', 'Library'), link('#/decks', 'Decks'), R.code ? link('#/room/' + R.code, 'Room ' + R.code) : null);
 }
 function render() {
+  if (drag && drag.active) { renderPending = true; return; }
   const hash = location.hash || '#/';
   const parts = hash.slice(2).split('/');
   let view;
-  if (parts[0] === 'room' && parts[1]) { enterRoom(parts[1].toUpperCase()); view = viewRoom(); }
+  const inRoom = parts[0] === 'room' && !!parts[1];
+  if (inRoom) { enterRoom(parts[1].toUpperCase()); view = viewRoom(); }
   else if (parts[0] === 'library') view = viewLibrary();
   else if (parts[0] === 'decks' && parts[1]) view = viewDeckEdit(parts[1]);
   else if (parts[0] === 'decks') view = viewDecks();
   else view = viewHome();
+  const tableShown = inRoom && view.classList.contains('room');
+  document.body.classList.toggle('in-room', tableShown);
   const y = window.scrollY;
-  $app.replaceChildren(nav(), view);
-  window.scrollTo(0, y);
+  const logScroll = document.querySelector('.log ol')?.scrollTop || 0;
+  $app.replaceChildren(...(tableShown ? [view] : [nav(), view]));
+  if (!tableShown) window.scrollTo(0, y);
+  const log = document.querySelector('.log ol');
+  if (log) log.scrollTop = logScroll;
   renderModal();
 }
 window.addEventListener('hashchange', () => { closeModal(); window.scrollTo(0, 0); render(); });
-window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modalFn) closeModal(); });
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modalFn) return closeModal();
+  if (modalFn || !R.me || !R.pub || !document.body.classList.contains('in-room') || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'd' || e.key === 'D') draw(1);
+  if ((e.key === 'e' || e.key === 'E') && R.pub.started && R.pub.turn === R.me) endTurn();
+});
 
 $app.replaceChildren(h('p', { class: 'muted pad' }, 'Loading…'));
 connect().then((n) => { net = n; render(); });

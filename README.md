@@ -4,7 +4,7 @@ A website for playing That One Game online: rooms you join by link or code, a sp
 a library of every card, and a deck builder.
 
 It is an *assisted tabletop*. The site handles turns, the turn draw, life, level unlocks,
-stood/rested, face-down cards and combat math. Players carry out card effects by hand using the
+active/rested, face-down cards and combat math. Players carry out card effects by hand using the
 menus on each card (change stats, move cards, draw, mill, search and so on).
 
 ## Files
@@ -72,11 +72,11 @@ hold it sideways: upright, the room asks you to rotate.
   - a card on the table onto a discard pile, the "Out" chip, a deck or a hand: move it there
     (units ask whether they were killed or only sent to the discard pile)
   - a card on the table onto the other side of the field: change who controls it
-- **Tap or click** a card for everything else: rest/stand, play face down, flip, change stats,
+- **Tap or click** a card for everything else: rest or make active, play face down, flip, change stats,
   markers (Condemned, Poisoned, Guard Duty), the soul under a card, and the less common moves.
 - **Attacking the player** lets them pick a blocker or take the hit. The site shows the result
   and either player presses **Apply result**.
-- **End turn** stands the next player's cards, resets their plays and draws their card.
+- **End turn** makes the next player's cards active, resets their plays and draws their card.
 - Life at 20 or 10 unlocks level 2 or 3 for both players. Playing a card above the unlocked
   level asks for confirmation instead of being blocked, so card effects can still override.
 - **Menu** has a die roll, a coin flip, reveal hand, rematch and concede. The log on the right

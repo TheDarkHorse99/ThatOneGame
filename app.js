@@ -762,7 +762,7 @@ function declareAttack(iid, target) {
       const t = findInst(R.pub, tgt);
       if (!t) return;
       const v = statsOf(t.inst)[col];
-      const why = !t.inst.r ? 'That unit is stood, and stood units cannot be attacked.' : v == null ? `That unit has no ${COL_NAMES[col]}.` : '';
+      const why = !t.inst.r ? 'That unit is active, and active units cannot be attacked.' : v == null ? `That unit has no ${COL_NAMES[col]}.` : '';
       if (why && !confirm(why + ' Attack it anyway?')) return;
     }
     closeModal();
@@ -784,7 +784,7 @@ function declareAttack(iid, target) {
         btn(`${seatName(foe)} (the player)`, () => launch('P'), 'primary'),
         targets.map((x) => {
           const v = statsOf(x)[col];
-          const why = !x.r ? 'stood' : v == null ? `no ${COL_NAMES[col]}` : '';
+          const why = !x.r ? 'active' : v == null ? `no ${COL_NAMES[col]}` : '';
           return h('button', { class: 'btn', disabled: !!why, onclick: () => launch(x.i) }, `${instName(x)} ${why ? '(' + why + ')' : `(${COL_NAMES[col]} ${v})`}`);
         })),
       cols.length > 1 ? btn('Back', () => { col = -1; renderModal(); }) : null);
@@ -923,7 +923,7 @@ function fieldMenu(iid) {
     const group = (title, open, ...kids) => h('details', { open }, h('summary', {}, title), kids);
     return h('div', {}, head, myHidden ? h('p', { class: 'muted' }, 'This card is face down. Your opponent cannot see it.') : null,
       h('div', { class: 'bar' },
-        btn(inst.r ? 'Stand' : 'Rest', () => editInst(iid, (x) => { x.r = !x.r; }, (x) => `${x.r ? 'stood' : 'rested'} ${instName(x)}.`), 'primary'),
+        btn(inst.r ? 'Make active' : 'Rest', () => editInst(iid, (x) => { x.r = !x.r; }, (x) => (x.r ? `made ${instName(x)} active.` : `rested ${instName(x)}.`)), 'primary'),
         isUnit && f.ctrl === R.me ? btn('Attack', () => { closeModal(); declareAttack(iid); }, 'primary') : null,
         myHidden ? btn('Flip face up (Ambush)', () => flipUp(iid), 'primary') : null,
         inst.c && inst.o === R.me ? btn('Turn face down', () => flipDown(iid)) : null),
@@ -1085,7 +1085,7 @@ function combatPanel() {
     const head = `${s.seats[c.ak].name} attacks ${s.seats[def].name} with ${instName(A.inst)} (${COL_NAMES[c.col]} ${statsOf(A.inst)[c.col]}).`;
     if (R.me !== def) return h('div', { class: 'prompt combat' }, h('p', {}, head), h('p', { class: 'muted' }, `Waiting for ${s.seats[def].name} to block or not.`), R.me ? btn('Cancel combat', cancelCombat) : null);
     const list = blockers(s);
-    return h('div', { class: 'prompt combat mine' }, h('p', {}, head), h('p', {}, 'Block with a stood unit, or take the hit.'),
+    return h('div', { class: 'prompt combat mine' }, h('p', {}, head), h('p', {}, 'Block with an active unit, or take the hit.'),
       h('div', { class: 'bar' }, list.map((x) => { const v = statsOf(x)[c.col]; return btn(`Block with ${instName(x)} (${v == null ? 'counts as 0' : COL_NAMES[c.col] + ' ' + v})`, () => chooseBlock(x.i), 'primary'); }),
         btn("Don't block", () => chooseBlock(''), 'danger')));
   }

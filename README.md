@@ -65,12 +65,12 @@ hold it sideways: upright, the room asks you to rotate.
 - Each player may mulligan once before the game starts. **Start game** picks the first player
   at random.
 - **Drag** to do the common things:
-  - a card from your hand onto your field: play it (events go straight to the discard pile)
-  - a card from your hand onto your discard pile or deck: discard it, or put it on top
-  - your deck onto your hand: draw a card. Your deck onto your discard pile: mill a card
+  - a card from your hand onto your field: play it (events go straight to the grave)
+  - a card from your hand onto your grave or deck: discard it, or put it on top
+  - your deck onto your hand: draw a card. Your deck onto your grave: mill a card
   - your unit onto an opposing unit or onto the opponent: attack (you pick the color)
-  - a card on the table onto a discard pile, the "Out" chip, a deck or a hand: move it there
-    (units ask whether they were killed or only sent to the discard pile)
+  - a card on the table onto a grave, the "Del" (deleted) chip, a deck or a hand: move it there
+    (units ask whether they were destroyed or only sent to the grave)
   - a card on the table onto the other side of the field: change who controls it
 - **Tap or click** a card for everything else: rest or make active, play face down, flip, change stats,
   markers (Condemned, Poisoned, Guard Duty), the soul under a card, and the less common moves.

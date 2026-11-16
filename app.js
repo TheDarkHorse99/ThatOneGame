@@ -614,7 +614,7 @@ async function deckTo(cid, dest) {
   await tx((s) => {
     if (dest === 'field') putOnField(s, R.me, cid, iid, false);
     if (dest === 'discard') s.pl[R.me].discard.push(cid);
-  }, dest === 'hand' ? 'took a card from their deck into hand.' : dest === 'deckBottom' ? 'put a card on the bottom of their deck.' : dest === 'field' ? `played ${card.name} from their deck.` : `sent ${card.name} from their deck to the discard pile.`,
+  }, dest === 'hand' ? 'took a card from their deck into hand.' : dest === 'deckBottom' ? 'put a card on the bottom of their deck.' : dest === 'field' ? `played ${card.name} from their deck.` : `sent ${card.name} from their deck to the grave.`,
   dest === 'field' || dest === 'discard' ? cid : null);
 }
 // Move a card out of one of my public piles (discard, removed).
@@ -624,7 +624,7 @@ async function pileTo(pile, idx, dest) {
   const card = CARD_BY_ID[cid];
   if (dest === 'field' && !levelOk(card)) return;
   const iid = newId(R.me);
-  const from = pile === 'discard' ? 'their discard pile' : 'removed from play';
+  const from = pile === 'discard' ? 'their grave' : 'their deleted cards';
   closeModal();
   await tx((s) => {
     const list = s.pl[R.me][pile];
@@ -635,7 +635,7 @@ async function pileTo(pile, idx, dest) {
     else if (dest === 'discard') s.pl[R.me].discard.push(cid);
     else if (dest === 'removed') s.pl[R.me].removed.push(cid);
     else s.inbox[R.me].push({ id: newId('in'), c: cid, d: dest });
-  }, dest === 'field' ? `played ${card.name} from ${from}.` : dest === 'hand' ? `returned ${card.name} from ${from} to hand.` : dest === 'removed' ? `removed ${card.name} from play.` : dest === 'discard' ? `moved ${card.name} to the discard pile.` : `shuffled ${card.name} from ${from} into their deck.`, cid);
+  }, dest === 'field' ? `played ${card.name} from ${from}.` : dest === 'hand' ? `returned ${card.name} from ${from} to hand.` : dest === 'removed' ? `deleted ${card.name}.` : dest === 'discard' ? `moved ${card.name} to the grave.` : `shuffled ${card.name} from ${from} into their deck.`, cid);
 }
 const instName = (inst) => (inst.c ? CARD_BY_ID[inst.c].name : 'a hidden card');
 async function fieldTo(iid, dest, verb) {
@@ -698,7 +698,7 @@ async function endTurn() {
 }
 
 // Soul: cards kept underneath a card on the table. Entries are "owner|cardId".
-// When the top card leaves the table, its soul goes to the owners' discard piles (see leave()).
+// When the top card leaves the table, its soul goes to the owners' graves (see leave()).
 async function toSoul(iid, targetIid) {
   const g = findInst(R.pub, iid);
   const t = findInst(R.pub, targetIid);
@@ -727,7 +727,7 @@ async function soulToDiscard(iid, index) {
     if (!f) return false;
     const out = index == null ? f.inst.soul.splice(0) : f.inst.soul.splice(index, 1);
     for (const entry of out) { const [owner, cid] = entry.split('|'); s.pl[owner].discard.push(cid); }
-  }, index == null ? `sent the whole soul of ${instName(g.inst)} to the discard pile.` : `sent a card from the soul of ${instName(g.inst)} to the discard pile.`);
+  }, index == null ? `sent the whole soul of ${instName(g.inst)} to the grave.` : `sent a card from the soul of ${instName(g.inst)} to the grave.`);
 }
 function soulSection(inst, canEdit) {
   const soul = inst.soul || [];
@@ -736,7 +736,7 @@ function soulSection(inst, canEdit) {
     soul.length ? h('div', { class: 'list' }, soul.map((entry, i) => {
       const card = CARD_BY_ID[entry.split('|')[1]];
       return h('div', { class: 'row' }, h('button', { class: 'linkish', onclick: () => showPreview(card) || toast(card.effect || 'No effect.') }, card.name),
-        canEdit ? btn('To discard pile', () => soulToDiscard(inst.i, i), 'tiny') : null);
+        canEdit ? btn('To grave', () => soulToDiscard(inst.i, i), 'tiny') : null);
     })) : h('p', { class: 'muted' }, 'No cards under this card.'));
 }
 
@@ -825,7 +825,7 @@ function outcome(s) {
   if (!D) return null;
   const dv = statsOf(D.inst)[c.col] || 0;
   const dead = av > dv ? [D.inst] : av < dv ? [A.inst] : [A.inst, D.inst];
-  return { av, dv, dead: dead.map((x) => x.i), text: `${instName(A.inst)} ${av} vs ${instName(D.inst)} ${dv} in ${COL_NAMES[c.col]}: ${dead.length === 2 ? 'a tie, both are killed' : instName(dead[0]) + ' is killed'}.` };
+  return { av, dv, dead: dead.map((x) => x.i), text: `${instName(A.inst)} ${av} vs ${instName(D.inst)} ${dv} in ${COL_NAMES[c.col]}: ${dead.length === 2 ? 'a tie, both are destroyed' : instName(dead[0]) + ' is destroyed'}.` };
 }
 async function applyCombat() {
   const o = outcome(R.pub);
@@ -877,21 +877,21 @@ function handleDrop(src, zone) {
     return true;
   }
   if (kind === 'pile') {
-    if (a === 'removed') fieldTo(src.iid, 'removed', 'removed from play:');
+    if (a === 'removed') fieldTo(src.iid, 'removed', 'deleted:');
     else if (a === 'deck') fieldTo(src.iid, 'deckTop', 'put on top of the deck:');
     else if (isUnit(g.inst)) killOrSend(src.iid);
-    else fieldTo(src.iid, 'discard', 'sent to the discard pile:');
+    else fieldTo(src.iid, 'discard', 'sent to the grave:');
     return true;
   }
   return false;
 }
-// "Kill" and "send to the discard pile" are different things in the rules, so ask.
+// "Destroy" and "send to the grave" are different things in the rules, so ask.
 function killOrSend(iid) {
   openModal(() => {
     const f = findInst(R.pub, iid);
     if (!f) return null;
-    return h('div', {}, h('h2', {}, `${instName(f.inst)} goes to the discard pile`), h('p', { class: 'muted' }, 'A killed unit has died. A unit that is sent to the discard pile has not.'),
-      h('div', { class: 'bar' }, btn('Kill', () => fieldTo(iid, 'discard', 'killed'), 'danger'), btn('Send to discard pile', () => fieldTo(iid, 'discard', 'sent to the discard pile:'))));
+    return h('div', {}, h('h2', {}, `${instName(f.inst)} goes to the grave`), h('p', { class: 'muted' }, 'A destroyed unit counts as destroyed for card effects. A unit that is sent to the grave does not.'),
+      h('div', { class: 'bar' }, btn('Destroy', () => fieldTo(iid, 'discard', 'destroyed'), 'danger'), btn('Send to grave', () => fieldTo(iid, 'discard', 'sent to the grave:'))));
   });
 }
 
@@ -932,10 +932,10 @@ function fieldMenu(iid) {
         h('div', { class: 'bar' }, TAGS.map((t) => h('button', { class: 'btn' + (inst.tags.includes(t) ? ' on' : ''), onclick: () => editInst(iid, (x) => { x.tags = x.tags.includes(t) ? x.tags.filter((y) => y !== t) : [...x.tags, t]; }, (x) => (x.tags.includes(t) ? `removed the ${t} marker from ${instName(x)}.` : `marked ${instName(x)} as ${t}.`)) }, t)),
           btn('Note', () => { const n = prompt('Note shown on this card (leave empty to clear)', inst.note || ''); if (n != null) editInst(iid, (x) => { x.note = n.slice(0, 40); }); }))),
       group(`Soul (${inst.soul.length})`, inst.soul.length > 0, soulSection(inst, true),
-        h('div', { class: 'bar' }, btn('Put this card into a soul', () => { picking = true; renderModal(); }), inst.soul.length ? btn('Send whole soul to discard pile', () => soulToDiscard(iid)) : null)),
+        h('div', { class: 'bar' }, btn('Put this card into a soul', () => { picking = true; renderModal(); }), inst.soul.length ? btn('Send whole soul to grave', () => soulToDiscard(iid)) : null)),
       group('Move (or drag the card)', false,
-        h('div', { class: 'bar' }, send('Kill', 'discard', 'killed', 'danger'), send('Send to discard pile', 'discard', 'sent to the discard pile:'), send('Return to hand', 'hand', 'returned to hand:'),
-          send('Deck top', 'deckTop', 'put on top of the deck:'), send('Deck bottom', 'deckBottom', 'put on the bottom of the deck:'), send('Shuffle into deck', 'deckShuffle', 'shuffled into the deck:'), send('Remove from play', 'removed', 'removed from play:'),
+        h('div', { class: 'bar' }, send('Destroy', 'discard', 'destroyed', 'danger'), send('Send to grave', 'discard', 'sent to the grave:'), send('Return to hand', 'hand', 'returned to hand:'),
+          send('Deck top', 'deckTop', 'put on top of the deck:'), send('Deck bottom', 'deckBottom', 'put on the bottom of the deck:'), send('Shuffle into deck', 'deckShuffle', 'shuffled into the deck:'), send('Delete', 'removed', 'deleted:'),
           btn(f.ctrl === R.me ? 'Give control to opponent' : 'Take control', () => editInst(iid, (x, s, g) => { s.pl[g.ctrl].field.splice(g.idx, 1); s.pl[opp(g.ctrl)].field.push(x); }, (x) => `changed control of ${instName(x)}.`)))));
   });
 }
@@ -951,7 +951,7 @@ function handMenu(idx) {
   });
 }
 function pileMenu(p, pile) {
-  const title = `${seatName(p)}: ${pile === 'discard' ? 'discard pile' : 'removed from play'}`;
+  const title = `${seatName(p)}: ${pile === 'discard' ? 'grave' : 'deleted cards'}`;
   let picked = -1;
   openModal(() => {
     const list = R.pub.pl[p][pile];
@@ -959,7 +959,7 @@ function pileMenu(p, pile) {
       const card = CARD_BY_ID[list[picked]];
       const idx = picked;
       const mv = (label, dest) => btn(label, () => pileTo(pile, idx, dest));
-      return h('div', {}, cardDetail(card), p === R.me ? h('div', { class: 'bar' }, mv('Play to field', 'field'), mv('To hand', 'hand'), mv('Shuffle into deck', 'deckShuffle'), pile === 'discard' ? mv('Remove from play', 'removed') : mv('To discard pile', 'discard')) : null,
+      return h('div', {}, cardDetail(card), p === R.me ? h('div', { class: 'bar' }, mv('Play to field', 'field'), mv('To hand', 'hand'), mv('Shuffle into deck', 'deckShuffle'), pile === 'discard' ? mv('Delete', 'removed') : mv('To grave', 'discard')) : null,
         btn('Back', () => { picked = -1; renderModal(); }));
     }
     return h('div', {}, h('h2', {}, title), list.length ? h('div', { class: 'grid' }, list.map((cid, i) => cardView(CARD_BY_ID[cid], { onclick: () => { picked = i; renderModal(); } })).reverse()) : h('p', { class: 'muted' }, 'Empty.'));
@@ -976,7 +976,7 @@ function deckMenu() {
       const take = (cid, dest) => async () => { await deckTo(cid, dest); renderModal(); };
       return h('div', {}, h('h2', {}, 'Search your deck'), h('p', { class: 'muted' }, 'Your deck is shuffled when you finish.'),
         h('div', { class: 'list' }, sorted.map((cid) => h('div', { class: 'row' }, h('button', { class: 'linkish', onclick: () => toast(CARD_BY_ID[cid].effect || 'No effect.') }, `${deck.filter((x) => x === cid).length}× ${CARD_BY_ID[cid].name}`),
-          h('span', { class: 'row-actions' }, btn('Hand', take(cid, 'hand'), 'tiny'), btn('Field', take(cid, 'field'), 'tiny'), btn('Discard', take(cid, 'discard'), 'tiny'))))),
+          h('span', { class: 'row-actions' }, btn('Hand', take(cid, 'hand'), 'tiny'), btn('Field', take(cid, 'field'), 'tiny'), btn('Grave', take(cid, 'discard'), 'tiny'))))),
         btn('Done (shuffle)', closeModal, 'primary'));
     }
     if (mode === 'top') {
@@ -1060,8 +1060,8 @@ function piles(p) {
   const deck = h('button', { class: 'pile', type: 'button', 'data-drop': `pile:deck:${p}`, 'data-pile': 'deck', disabled: !isMe, onclick: isMe ? deckMenu : null, title: 'Deck' }, cardBack(), h('span', { class: 'pile-n' }, d.deck));
   if (isMe) dragSource(deck, { k: 'deck' });
   return h('div', { class: 'piles' }, deck,
-    h('button', { class: 'pile', type: 'button', 'data-drop': `pile:discard:${p}`, 'data-pile': 'discard', onclick: () => pileMenu(p, 'discard'), title: 'Discard pile' }, top ? cardView(top, { still: true }) : h('div', { class: 'card empty' }, 'Discard'), h('span', { class: 'pile-n' }, d.discard.length)),
-    h('button', { class: 'removed', type: 'button', 'data-drop': `pile:removed:${p}`, 'data-pile': 'removed', onclick: () => pileMenu(p, 'removed'), title: 'Removed from play' }, 'Out ', h('strong', {}, d.removed.length)));
+    h('button', { class: 'pile', type: 'button', 'data-drop': `pile:discard:${p}`, 'data-pile': 'discard', onclick: () => pileMenu(p, 'discard'), title: 'Grave' }, top ? cardView(top, { still: true }) : h('div', { class: 'card empty' }, 'Grave'), h('span', { class: 'pile-n' }, d.discard.length)),
+    h('button', { class: 'removed', type: 'button', 'data-drop': `pile:removed:${p}`, 'data-pile': 'removed', onclick: () => pileMenu(p, 'removed'), title: 'Deleted cards' }, 'Del ', h('strong', {}, d.removed.length)));
 }
 function midBar() {
   const s = R.pub;

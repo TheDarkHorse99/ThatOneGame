@@ -77,7 +77,7 @@ function cardView(card, opts = {}) {
       h('span', { class: 'emblem' }, 'T·O·G'), inst ? badges(inst) : null);
   }
   const values = inst ? statsOf(inst) : card.stats;
-  const len = card.effect.length > 260 ? ' xlong' : card.effect.length > 150 ? ' long' : '';
+  const len = card.effect.length > 190 ? ' xlong' : card.effect.length > 110 ? ' long' : '';
   const cls = `card t-${card.type}${len}${inst && inst.h ? ' facedown' : ''}${opts.dim ? ' dim' : ''}`;
   return h(tag, { class: cls, type: opts.still ? null : 'button', onclick: opts.onclick, onmouseenter: opts.still ? null : () => showPreview(card, inst), 'data-card': card.id, 'data-iid': inst && inst.i, 'data-drop': opts.drop },
     h('div', { class: 'c-head' }, h('span', { class: 'c-name' }, card.name), h('span', { class: 'c-lv', title: 'Level ' + card.level }, card.level)),

@@ -1,5 +1,5 @@
 // Card data for That One Game.
-// Snapshot of the "Cards" Google Sheet taken 2026-11-12.
+// Snapshot of the "Cards" Google Sheet: original six sets taken 2026-11-12; Frozen Kingdom, Guardian Angels and Seed of Doubt added 2026-11-16.
 // Each line is: Name | type | traits | stats (R,Y,G,B; x = the card does not have that stat) | level | effect
 // To change a card, edit its line here (or ask Claude to re-sync from the sheet).
 
@@ -153,6 +153,63 @@ Accelerator|unit|robot|0,0,0,0|2|(Action): If you control "The World Engine", yo
 Recycler|object|||1|At the beginning of your turn, put one of your cards that was removed from play into your discard pile.
 Stasis Machine|object|||3|When this enters, draw 2. You cannot lose from having 0 cards in your deck.
 Calculated Failsafes|event|||2|(Quick): If a robot or Ai you control would die, remove from a play a card in your discard pile, and it doesn't die.
+`,
+  'Frozen Kingdom': String.raw`
+The Ice Queen|unit|Snow|x,6,x,6|3|1) All other snow units get +1YB.\n2) If you control a snow location, this unit has Snow Guardian (Quick: You may rest this unit. For the rest of the turn, other snow units not named "The Ice Queen" cannot be attacked while this is on the field. An attack already declared on one of them is cancelled).\n3) When played, choose a unit; it gains Permafrost (permanently frozen). Then choose a unit; it gains Frostbite (can't use abilities until the end of their next turn).
+The Frozen Kingdom|location|Snow||2|At the beginning of your turn, Freeze a unit your opponent played last turn. (Freeze: unit can't attack on their next turn)
+The Abominable Snowman|unit|Snow|x,8,x,8|3|This unit can attack active frozen units.
+Ice-tipped Archer|unit|Snow|x,2,x,4|2|When played, if you have a snow card on the field, freeze an opponent's lv2 or less unit.
+Icicle Bearer|unit|Snow|x,4,x,1|2|When this unit deals dmg to your opponent, if you have another snow card on the field, give one of their units frostbite (can't use abilities until the end of their next turn).
+The Snow White Princess|unit|Snow|x,1,x,1|2|This unit gets +1YB for each other snow card with different names on your field.
+The Frozen Court Jester|unit|Snow|0,1,0,1|1|1) When played, if you do not control a "The Frozen Kingdom", you may search your deck for it.\n2) When this unit dies, if you do not control "The Ice Queen", you may search for it.
+Northwind Spearman|unit|Snow|x,x,x,1|1|At the beginning of your turn, if your opponent has an active unit, draw a card.
+Mountain Villager|unit|Snow|x,2,x,2|1|If you played a snow card this turn, you have +1 Bonus Plays.
+Ice Devil Cultist|unit|Snow, Ice Devil|3,x,x,1|1|At the end of your opponent's turn, you may sacrifice this unit. If you do, freeze a unit that is currently frozen (extending its freeze).
+Ice Devil Orator|unit|Snow, Ice Devil|1,0,0,1|2|When this unit blocks a unit and dies, freeze it. If it's lv2 or less, give it frostbite (can't use abilities until the end of their next turn).
+The Ice Devil|unit|Snow, Ice Devil|5,x,x,5|3|1) When your snow unit dies, if the opponent has a frozen unit, draw a card.\n2) This unit gets +1RB for each frozen/frostbitten unit.
+`,
+  'Guardian Angels': String.raw`
+Divine Ray Angel of the Third Order|unit|Angel|0,1,0,0|1|(Quick): When your opponent attacks, if you have more than 20 life, you may play this card from hand and immediately block the attack. You may only activate a unit with this name's ability once per turn.
+Radiant Halo Angel of the Third Order|unit|Angel|x,1,x,x|1|(Quick): When your opponent attacks, if you have more than 20 life, you may discard this card from hand to negate 5 of the damage. You may only activate a unit with this name's ability once per turn.
+Hopeful Wings Angel of the Third Order|unit|Angel|x,2,x,x|1|(Quick): When your opponent plays a card, if you have more than 20 life, you may discard this card to send that card back to hand (its "when played" effects still happen). You may only activate a unit with this name's ability once per turn.
+Uriel, Archangel of the Third Order|unit|Angel, Archangel|0,4,4,0|2|1) You may play, activate and trigger "Angel of the Third Order" cards if you have more than 10 life (instead of more than 20).\n2) At the beginning of your turn, gain 2 life.\n3) Guardian of the Realm (This unit can block even when rested).
+Michael, Archangel of the Third Order|unit|Angel, Archangel|0,4,4,0|2|1) You may play, activate and trigger "Angel of the Third Order" cards if you have more than 10 life (instead of more than 20).\n2) At the end of your turn, you may shuffle an Angel unit from your discard pile into your deck and draw 1.\n3) Guardian of the Realm (This unit can block even when rested).
+Gabriel, Archangel of the Third Order|unit|Angel, Archangel|0,3,3,0|2|1) You may play, activate and trigger "Angel of the Third Order" cards if you have more than 10 life (instead of more than 20).\n2) Guardian of the Realm (This unit can block even when rested).\n3) (Action): OPT: You may discard an angel unit from your hand, then search your deck for a lv1 or lower angel unit and add it to hand.
+Guardian Angel of the Third Order|unit|Angel|x,2,x,2|1|If you have more than 20 life, you may draw an additional card at the beginning of your turn and play an additional card each turn.
+Resounding Horn Angel of the Third Order|unit|Angel|x,1,x,x|1|(Action): If you have more than 20 life, you may sacrifice this unit to search your deck for a lv2 archangel unit and add it to your hand.
+Hail Mary|event|||1|Discard a card from hand and search the top 5 cards of your deck. Add 2 angel cards from among them to hand.
+Gloria in Excelsis Deo|event|||2|(Quick): When your opponent activates a card effect, if you have more than 10 life, you may play this. Your lv2 archangels cannot be killed by card effects this turn. At the end of the turn, lose 5 life.
+Prayers Answered|event|||1|If you have 20 or less life, gain 3 life. If you have 10 or less life, gain 5 instead.
+Garden of Eden|location|||2|1) At the beginning of your turn, if you have more than 10 life, draw a card.\n2) If you have an angel on the field, you may play an additional card each turn.\n3) OPT: When you play an angel on your opponent's turn, gain 2 life.
+Horn of Gabriel|object|||1|Sacrifice this object to play an additional angel this turn.
+Smite|event|||2|If you control an angel on the field, send a lv2 card to the discard pile.
+Ruler of the Third Order|unit|Angel, Ruler|3,3,3,3|2|COST: [You must have 10 or less life]\n1) When played, set your life to 11.\n2) All archangels you control get +2RYGB.\n3) When an archangel you control would die, shuffle it into your deck instead.
+Wishful Prayers Angel of the Third Order|unit|Angel|x,1,1,x|1|(Quick): When one of your lv2 or lower angels would be killed, if you have more than 20 life, you may send this to the discard pile instead. You may only activate a unit with this name's ability once per turn.
+`,
+  'Seed of Doubt': String.raw`
+Seed of Doubt|unit|Negativity|x,x,0,x|1|1) This card starts the game in play and your starting hand size is reduced by 1.\n2) You may not have more than one copy in your deck.\n3) Rooted (This unit cannot be removed from play. If this unit would be removed, send 2 cards from its soul to the discard pile. If you cannot, you lose 3 life).\n4) At the end of your turn, lose 3 life.
+Budding Sorrow|unit|Negativity|x,1,3,x|1|If this card didn't evolve, it has no effects.\nEvolve: Seed of Doubt (A unit may only evolve OPT. Place this card on top of the specified unit. Every card underneath becomes this unit's soul.)\nRooted.\nDuring your turn, when you play a card, you may place a card from hand into this unit's soul and draw 1.\nAt the end of your turn, lose 3 life.
+Sapling of the Gloomy Night|unit|Negativity|x,4,1,x|1|If this card didn't evolve, it has no effects.\nEvolve: Seed of Doubt.\nRooted.\nAt the beginning of your turn, you may draw 1. If you don't, you get +1 Bonus Play this turn.\nAt the end of your turn, lose 3 life.
+Regret in the Leaves|unit|Negativity|x,2,4,x|2|If this card didn't evolve, it has no effects.\n(If you have 20 or less life) Evolve: Budding Sorrow.\nRooted.\n(Action): OPT: You may put one of your units and one of your opponent's units with the same level as each other into this unit's soul.\nAt the end of your turn, lose 3 life.
+Twisted Shameful Vines|unit|Negativity|x,3,5,x|2|If this card didn't evolve, it has no effects.\n(If you have 20 or less life) Evolve: Budding Sorrow.\nRooted.\n(Action): (Cost: Send a card from your hand to this unit's soul and lose 3 life): Your opponent rests a unit and loses 3 life.\nAt the end of your turn, lose 3 life.
+Guilty Blossom|unit|Negativity|x,5,7,x|3|If this card didn't evolve, it has no effects.\n(If you have 10 or less life) Evolve: Regret in the Leaves.\nRooted.\n(Action): OPT: Send 5 cards from the soul to the discard pile, then send an opponent's unit to the discard pile.\n(Action): OPT: Send 10 cards from the soul to the discard pile, then kill all units on the field and deal 1 dmg to the opponent for each one.\nAt the end of your turn, gain 3 life.
+Thousand Melancholy Boughs|unit|Negativity|x,5,5,x|3|If this card didn't evolve, it has no effects.\n(If you have 10 or less life) Evolve: Regret in the Leaves.\nRooted.\nWhen played, you may send 5 cards from the soul to the discard pile. If you do, both players' life is halved, rounded up.\n(Action): OPT: (Cost: Send 5 cards from the soul to the discard pile): Your opponent draws 1 less card at the beginning of their turn (down to 1) and loses 1 Bonus Play for their turn.\nAt the end of your turn, gain 3 life.
+Blue Sprite|unit|Sprite|x,x,x,1|1|When this unit leaves the field, you may send this unit to the soul of a card on your field, then draw a card.
+Red Sprite|unit|Sprite|1,x,x,x|1|When this unit leaves the field, you may lose 2 life, then send an opponent's lv1 object or unit to the discard pile.
+Yellow Sprite|unit|Sprite|x,1,x,x|1|When this unit leaves the field, you may send it to the soul of a card on your field, then put 2 cards from your discard pile into the soul of a card on the field.
+Green Sprite|unit|Sprite|x,x,1,x|1|When this unit leaves the field, you may lose 2 life, then look at your opponent's hand and discard a card.
+Darkest Hour|event|||2|Send this card to the soul of a negativity unit on your field, lose 3 life, then draw 3 cards.
+Leaking Manifestation|unit||x,x,2,x|1|At the beginning of your turn, if you lost life last turn, send a card from your discard pile to soul, then if the chosen unit was a negativity unit, draw a card.
+Sower of Doubt|unit||x,0,0,x|1|Send this unit to your soul to search your deck for a negativity unit and add it to your hand.
+Gloom Bramble|unit||0,4,4,0|2|When this unit would die after blocking, if it blocked in R or B, you may send a card from the discard to the soul of a unit on the field. If you do, this unit isn't killed.
+The Lonely Forest|location|||1|1) Your negativity units get +1RYGB.\n2) At the end of your turn, mill 2.
+Seething Fairy|unit||1,6,6,1|2|At the beginning of your turn, lose 2 life.
+A Memory of Loss|object|||1|(Action): OPT: Send a card from the discard pile to the soul of a negativity unit, then you gain +1 Bonus Play this turn.
+Protection Circle|object|||1|Whenever you would lose life, lose 1 less life.
+Parasitic Spirit|unit||0,0,0,0|1|If you put 2 cards into the soul of a unit this turn, you have +1 Bonus Play.
+Deceitful Trickster|unit||x,4,4,x|2|1) At the beginning of your turn, if you have more than 10 life, you may have your life become 10, then draw a card.\n2) At the end of this turn, kill this unit, then gain 5 life.
+Painmeister|unit||x,2,2,x|1|(Action): OPT: Lose 3 life, then gain 1 Bonus Play this turn.
+Nourishment for the Soul|event|||1|Send a card from your discard to the soul of a unit on the field, then gain 3 life.
 `,
 };
 

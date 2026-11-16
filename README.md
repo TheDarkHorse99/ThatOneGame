@@ -69,7 +69,7 @@ hold it sideways: upright, the room asks you to rotate.
   - a card from your hand onto your grave or deck: discard it, or put it on top
   - your deck onto your hand: draw a card. Your deck onto your grave: mill a card
   - your unit onto an opposing unit or onto the opponent: attack (you pick the color)
-  - a card on the table onto a grave, the "Del" (deleted) chip, a deck or a hand: move it there
+  - a card on the table onto a grave, the "Out" (removed from play) chip, a deck or a hand: move it there
     (units ask whether they were destroyed or only sent to the grave)
   - a card on the table onto the other side of the field: change who controls it
 - **Tap or click** a card for everything else: rest or make active, play face down, flip, change stats,

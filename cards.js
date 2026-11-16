@@ -6,7 +6,7 @@
 const RAW = {
   'Basic': String.raw`
 Tornado|event|Disaster||1|Return a Lv 2 or less card back to hand.
-Meteor|event|Space||3|Send a unit or object controlled by each player to the grave
+Meteor|event|Space||3|Destroy a unit or object controlled by each player
 Ancient Redwoods|object|Flora||2|1) You have +1 Bonus Plays. 2) At the end of each of your turns, mill 3.
 Fungal Growths|object|Flora||2|Once per turn, you may shuffle a unit from your grave into your deck, then draw a card.
 Freshwater Snapper|unit|fish|2,2,2,2|1|
@@ -21,11 +21,11 @@ Gun|object|weapon||2|At the beginning of your turn, you may add "Shoot" from you
 P.I.|unit|detective|x,3,x,2|2|When played, look at your opponent's hand.
 Learned Experience|object|experience||1|Send this to the grave and add a Lv 1 unit to your hand.
 Wisdom|object|experience||2|You may look at the top card of your deck anytime.
-Epidemic|event|disease||3|Send all Level 3 cards to the grave
+Epidemic|event|disease||3|Destroy all Level 3 cards
 Voracious Yeti|unit|snow|10,5,x,x|3|
-Object Removal|event|destruction||1|Send an opponent's object to the grave.
-Trash Day|event|Destruction||1|Send a card with no effect to the grave.
-Wild Fire|event|Disaster||3|Send a location to the grave
+Object Removal|event|destruction||1|Destroy an opponent's object.
+Trash Day|event|Destruction||1|Destroy a card with no effect.
+Wild Fire|event|Disaster||3|Destroy a location
 Leech|unit|Water|x,x,1,x|1|At the end of the turn, your opponent mills 2 cards.
 Forcefield|object|Defense||1|When your opponent plays a lvl2 or lower unit, you may send this card to the grave, then return that unit back to hand.
 Magic Reversal|event|Spell||2|(Quick): For the rest of this turn, any life your opponent would gain, you gain instead.
@@ -41,8 +41,8 @@ Betrayal|event|Combat||2|Destroy a unit with a color matching one of yours.
 Hateful Rage|event|Combat||2|Destroy a unit with a color not matching any of yours.
 Poof!|event|Magic||2|Shuffle one of your opponent's level 2 or lower units back into their deck.
 Silent Killer|unit|Villain|0,x,x,0|1|(Quick): When your opponent attacks with a Level 2 or lower unit, you may play this from hand blocking the attacking unit. At the end of that attack, destroy the blocked unit.
-Brownie of the Glade|unit|Fae|x,0,0,x|1|OPT: You may sacrifice this unit to send a Y or G level 1 unit your opponent controls to the grave.
-Thievery|event|Villain||1|Send an object your opponent controls to the grave. You may discard a card, to then send another object controlled by your opponent to the grave.
+Brownie of the Glade|unit|Fae|x,0,0,x|1|OPT: You may sacrifice this unit to destroy a Y or G level 1 unit your opponent controls.
+Thievery|event|Villain||1|Destroy an object your opponent controls. You may discard a card, to then destroy another object controlled by your opponent.
 `,
   'Dark Forest': String.raw`
 The Dark Forest|location|Dark, Forest||1|1) You may Hide cards. (For your play per turn, place a card face down treating it as if it had no text except for Ambush.)\n2) When you Ambush, draw a card.
@@ -60,7 +60,7 @@ Sinister Fairy|unit|Dark Fauna, fairy|x,5,3,x|2|1) When an opposing unit attacks
 Mutated Stag|unit|Dark Fauna|5,x,2,x|2|1) When your opponent would draw a card, you may Ambush.\n2) When your opponent draws a card, you may discard a card and draw a card.
 Nocturnal Beasts|event|Dark||1|Flip all your Dark Fauna face down.
 Moonlit Glade|location|Dark, Forest||1|Your Dark Fauna that have been Ambushed get +1RYGB.
-Depraved Boar|unit|Dark Fauna|8,x,3,x|3|When your opponent plays a unit, you may Ambush, then send all opposing units with 3 or less R/G to the grave.
+Depraved Boar|unit|Dark Fauna|8,x,3,x|3|When your opponent plays a unit, you may Ambush, then destroy all opposing units with 3 or less R/G.
 Scurrying Mouse|unit|Fauna|x,x,1,x|1|If you control a Forest you have +1 Bonus Plays.
 Dread Mouse|unit|Dark Fauna|2,x,4,x|2|1) At the beginning of your turn, you may Ambush this card, then draw 1 card.\n2) At the end of turn you may discard a card, then Hide this card.
 Deep Meadow Elk|unit|Fauna|x,1,4,x|2|If your other Fauna unit would be destroyed, you may sacrifice this unit instead.
@@ -81,7 +81,7 @@ Time|object|Wonderland||1|If you control an “Alice”, you have +1 Bonus Plays
 Dormouse|unit|Wonderland, sleepy|x,x,1,x|1|If it is Tea Time, this card gets +4G.
 White Rabbit|unit|Wonderland, late|x,x,2,4|1|COST: Sacrifice a “Time” you control.\nWhen played, shuffle up to 3 wonderland cards from your grave into your deck, then draw a card for each card shuffled into your deck.
 Caterpillar|unit|Wonderland|x,3,x,3|1|If you control an “Alice”, you have +1 Bonus Plays.
-Jabberwock|unit|Beast|0,x,x,0|3|COST: [Control "Wonderland"]\n1) When played reveal the top 5 cards of your deck, add the combined R and B stats to this card, then shuffle deck.\n2) When played choose one: Jaws that Bite (Send a unit to the grave) OR Claws that Catch (Gain control of an opposing unit with less R/B than this unit) OR Eyes of Flame (Opponent reveals their hand and you discard one card from it).
+Jabberwock|unit|Beast|0,x,x,0|3|COST: [Control "Wonderland"]\n1) When played reveal the top 5 cards of your deck, add the combined R and B stats to this card, then shuffle deck.\n2) When played choose one: Jaws that Bite (Destroy a unit) OR Claws that Catch (Gain control of an opposing unit with less R/B than this unit) OR Eyes of Flame (Opponent reveals their hand and you discard one card from it).
 Vorpal Sword|object|Sword||3|COST: [Equip an "Alice" you control.]\nOnce per turn, you may Slay the Jabberwock (Send a "Jabberwock" you control to the grave, then the equipped "Alice" gets +RYGB equal to the sent unit's highest stat). The equipped Alice cannot be sent to the grave or destroyed.
 Playing Card Soldier|unit|Wonderland|0,0,0,0|2|Gets +3 R if you control another unit with red. The same applies for Y, G, and B.
 March Hare|unit|Wonderland|x,3,3,x|2|Can attack the turn it is played. At the end of your turn, return this card to your hand.
@@ -94,7 +94,7 @@ Bargain for your Life|object|contract||1|At the beginning of your turn, lose 5 l
 Demon’s Covenant|object|contract||2|At the beginning of your turn, lose 5 life\nAll demons you control get +3R
 Pact of the Summoned|object|contract||1|At the beginning of your turn, lose 5 life\nYou have +2 Bonus Plays.
 Lucifer, Prolonged Punishment|unit|devil/fallen angel|6,6,x,6|3|You cannot lose by the effects of “Deal with the Devil”\nWhen played, play a contract and a Lv1 demon from your deck
-Crossroads Demon|unit|demon|2,4,x,x|1|(Quick): When an opposing unit attacks, you may play this from your hand\nWhen this unit is destroyed in combat, the unit that attacked is Condemned (When it leaves the field, it is deleted)
+Crossroads Demon|unit|demon|2,4,x,x|1|(Quick): When an opposing unit attacks, you may play this from your hand\nWhen this unit is destroyed in combat, the unit that attacked is Condemned (When it leaves the field, remove it from play)
 Gates to Gehenna|location|hell||1|At the end of each turn, gain 1 life for each contract you control\nOPT: You may play a demon or devil from your grave
 Lucifer, the Morning Star|unit|devil/fallen angel|6,6,x,6|3|Units this unit destroys in combat are Condemned\nWhen this unit destroys another unit, it gets +1RYB\nThis unit can attack twice, if you lost 5 or more life this turn.
 Loophole|event|||1|Send one of your contracts to the grave
@@ -121,7 +121,7 @@ The Howling Wind|unit||x,2,5,x|2|All your Undead units get +2YG.
 The Nefarious Haunt|unit|Undead|1,x,2,x|1|Sacrifice this unit and take control of one of your opponent's Lv2 or lower units until end of turn.
 The Rotted Flesh|unit|Undead|x,1,1,x|1|When this unit is destroyed, you may mill 5 cards, then draw 2 cards.
 The Full Moon|event|||2|Destroy all your units, then you may play 3 Lv2 or lower Undead from your grave
-Master of the House|unit|Undead|x,8,8,x|3|Soulbond - "The Ghost Tree" (When either leaves play, the other goes to that same location).\nThis unit cannot be removed from play by card effects.
+Master of the House|unit|Undead|x,8,8,x|3|Soulbond - "The Ghost Tree" (When either leaves play, the other goes to that same location).\nThis unit cannot leave the field by card effects.
 The Drowned Bride|unit|Undead|x,6,3,x|2|Soulbond - "The Ghost Tree".\n(Action): Once per turn, you may sacrifice an Undead to destroy an opponent's unit of the same Lv.
 Child of the House|unit|Undead|0,0,0,0|1|Soulbond - "The Ghost Tree".\n(Action): Once per turn, you may lose life equal to two times the level of a unit in your grave, to play that unit.\nIt may attack this turn and it is destroyed at the end of turn.
 Cursed Stump|event|||1|Mill 5 cards, then search your deck for "The Ghost Tree".
@@ -182,20 +182,20 @@ Gloria in Excelsis Deo|event|||2|(Quick): When your opponent activates a card ef
 Prayers Answered|event|||1|If you have 20 or less life, gain 3 life. If you have 10 or less life, gain 5 instead.
 Garden of Eden|location|||2|1) At the beginning of your turn, if you have more than 10 life, draw a card.\n2) If you have an angel on the field, you may play an additional card each turn.\n3) OPT: When you play an angel on your opponent's turn, gain 2 life.
 Horn of Gabriel|object|||1|Sacrifice this object to play an additional angel this turn.
-Smite|event|||2|If you control an angel on the field, send a lv2 card to the grave.
+Smite|event|||2|If you control an angel on the field, destroy a lv2 card.
 Ruler of the Third Order|unit|Angel, Ruler|3,3,3,3|2|COST: [You must have 10 or less life]\n1) When played, set your life to 11.\n2) All archangels you control get +2RYGB.\n3) When an archangel you control would be destroyed, shuffle it into your deck instead.
 Wishful Prayers Angel of the Third Order|unit|Angel|x,1,1,x|1|(Quick): When one of your lv2 or lower angels would be destroyed, if you have more than 20 life, you may send this to the grave instead. You may only activate a unit with this name's ability once per turn.
 `,
   'Seed of Doubt': String.raw`
-Seed of Doubt|unit|Negativity|x,x,0,x|1|1) This card starts the game in play and your starting hand size is reduced by 1.\n2) You may not have more than one copy in your deck.\n3) Rooted (This unit cannot be removed from play. If this unit would be removed, send 2 cards from its soul to the grave. If you cannot, you lose 3 life).\n4) At the end of your turn, lose 3 life.
+Seed of Doubt|unit|Negativity|x,x,0,x|1|1) This card starts the game in play and your starting hand size is reduced by 1.\n2) You may not have more than one copy in your deck.\n3) Rooted (This unit cannot leave the field. If this unit would leave the field, send 2 cards from its soul to the grave. If you cannot, you lose 3 life).\n4) At the end of your turn, lose 3 life.
 Budding Sorrow|unit|Negativity|x,1,3,x|1|If this card didn't evolve, it has no effects.\nEvolve: Seed of Doubt (A unit may only evolve OPT. Place this card on top of the specified unit. Every card underneath becomes this unit's soul.)\nRooted.\nDuring your turn, when you play a card, you may place a card from hand into this unit's soul and draw 1.\nAt the end of your turn, lose 3 life.
 Sapling of the Gloomy Night|unit|Negativity|x,4,1,x|1|If this card didn't evolve, it has no effects.\nEvolve: Seed of Doubt.\nRooted.\nAt the beginning of your turn, you may draw 1. If you don't, you get +1 Bonus Play this turn.\nAt the end of your turn, lose 3 life.
 Regret in the Leaves|unit|Negativity|x,2,4,x|2|If this card didn't evolve, it has no effects.\n(If you have 20 or less life) Evolve: Budding Sorrow.\nRooted.\n(Action): OPT: You may put one of your units and one of your opponent's units with the same level as each other into this unit's soul.\nAt the end of your turn, lose 3 life.
 Twisted Shameful Vines|unit|Negativity|x,3,5,x|2|If this card didn't evolve, it has no effects.\n(If you have 20 or less life) Evolve: Budding Sorrow.\nRooted.\n(Action): (Cost: Send a card from your hand to this unit's soul and lose 3 life): Your opponent rests a unit and loses 3 life.\nAt the end of your turn, lose 3 life.
-Guilty Blossom|unit|Negativity|x,5,7,x|3|If this card didn't evolve, it has no effects.\n(If you have 10 or less life) Evolve: Regret in the Leaves.\nRooted.\n(Action): OPT: Send 5 cards from the soul to the grave, then send an opponent's unit to the grave.\n(Action): OPT: Send 10 cards from the soul to the grave, then destroy all units on the field and deal 1 dmg to the opponent for each one.\nAt the end of your turn, gain 3 life.
+Guilty Blossom|unit|Negativity|x,5,7,x|3|If this card didn't evolve, it has no effects.\n(If you have 10 or less life) Evolve: Regret in the Leaves.\nRooted.\n(Action): OPT: Send 5 cards from the soul to the grave, then destroy an opponent's unit.\n(Action): OPT: Send 10 cards from the soul to the grave, then destroy all units on the field and deal 1 dmg to the opponent for each one.\nAt the end of your turn, gain 3 life.
 Thousand Melancholy Boughs|unit|Negativity|x,5,5,x|3|If this card didn't evolve, it has no effects.\n(If you have 10 or less life) Evolve: Regret in the Leaves.\nRooted.\nWhen played, you may send 5 cards from the soul to the grave. If you do, both players' life is halved, rounded up.\n(Action): OPT: (Cost: Send 5 cards from the soul to the grave): Your opponent draws 1 less card at the beginning of their turn (down to 1) and loses 1 Bonus Play for their turn.\nAt the end of your turn, gain 3 life.
 Blue Sprite|unit|Sprite|x,x,x,1|1|When this unit leaves the field, you may send this unit to the soul of a card on your field, then draw a card.
-Red Sprite|unit|Sprite|1,x,x,x|1|When this unit leaves the field, you may lose 2 life, then send an opponent's lv1 object or unit to the grave.
+Red Sprite|unit|Sprite|1,x,x,x|1|When this unit leaves the field, you may lose 2 life, then destroy an opponent's lv1 object or unit.
 Yellow Sprite|unit|Sprite|x,1,x,x|1|When this unit leaves the field, you may send it to the soul of a card on your field, then put 2 cards from your grave into the soul of a card on the field.
 Green Sprite|unit|Sprite|x,x,1,x|1|When this unit leaves the field, you may lose 2 life, then look at your opponent's hand and discard a card.
 Darkest Hour|event|||2|Send this card to the soul of a negativity unit on your field, lose 3 life, then draw 3 cards.

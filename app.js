@@ -624,7 +624,7 @@ async function pileTo(pile, idx, dest) {
   const card = CARD_BY_ID[cid];
   if (dest === 'field' && !levelOk(card)) return;
   const iid = newId(R.me);
-  const from = pile === 'discard' ? 'their grave' : 'their deleted cards';
+  const from = pile === 'discard' ? 'their grave' : 'removed from play';
   closeModal();
   await tx((s) => {
     const list = s.pl[R.me][pile];
@@ -635,7 +635,7 @@ async function pileTo(pile, idx, dest) {
     else if (dest === 'discard') s.pl[R.me].discard.push(cid);
     else if (dest === 'removed') s.pl[R.me].removed.push(cid);
     else s.inbox[R.me].push({ id: newId('in'), c: cid, d: dest });
-  }, dest === 'field' ? `played ${card.name} from ${from}.` : dest === 'hand' ? `returned ${card.name} from ${from} to hand.` : dest === 'removed' ? `deleted ${card.name}.` : dest === 'discard' ? `moved ${card.name} to the grave.` : `shuffled ${card.name} from ${from} into their deck.`, cid);
+  }, dest === 'field' ? `played ${card.name} from ${from}.` : dest === 'hand' ? `returned ${card.name} from ${from} to hand.` : dest === 'removed' ? `removed ${card.name} from play.` : dest === 'discard' ? `moved ${card.name} to the grave.` : `shuffled ${card.name} from ${from} into their deck.`, cid);
 }
 const instName = (inst) => (inst.c ? CARD_BY_ID[inst.c].name : 'a hidden card');
 async function fieldTo(iid, dest, verb) {
@@ -877,7 +877,7 @@ function handleDrop(src, zone) {
     return true;
   }
   if (kind === 'pile') {
-    if (a === 'removed') fieldTo(src.iid, 'removed', 'deleted:');
+    if (a === 'removed') fieldTo(src.iid, 'removed', 'removed from play:');
     else if (a === 'deck') fieldTo(src.iid, 'deckTop', 'put on top of the deck:');
     else if (isUnit(g.inst)) killOrSend(src.iid);
     else fieldTo(src.iid, 'discard', 'sent to the grave:');
@@ -935,7 +935,7 @@ function fieldMenu(iid) {
         h('div', { class: 'bar' }, btn('Put this card into a soul', () => { picking = true; renderModal(); }), inst.soul.length ? btn('Send whole soul to grave', () => soulToDiscard(iid)) : null)),
       group('Move (or drag the card)', false,
         h('div', { class: 'bar' }, send('Destroy', 'discard', 'destroyed', 'danger'), send('Send to grave', 'discard', 'sent to the grave:'), send('Return to hand', 'hand', 'returned to hand:'),
-          send('Deck top', 'deckTop', 'put on top of the deck:'), send('Deck bottom', 'deckBottom', 'put on the bottom of the deck:'), send('Shuffle into deck', 'deckShuffle', 'shuffled into the deck:'), send('Delete', 'removed', 'deleted:'),
+          send('Deck top', 'deckTop', 'put on top of the deck:'), send('Deck bottom', 'deckBottom', 'put on the bottom of the deck:'), send('Shuffle into deck', 'deckShuffle', 'shuffled into the deck:'), send('Remove from play', 'removed', 'removed from play:'),
           btn(f.ctrl === R.me ? 'Give control to opponent' : 'Take control', () => editInst(iid, (x, s, g) => { s.pl[g.ctrl].field.splice(g.idx, 1); s.pl[opp(g.ctrl)].field.push(x); }, (x) => `changed control of ${instName(x)}.`)))));
   });
 }
@@ -951,7 +951,7 @@ function handMenu(idx) {
   });
 }
 function pileMenu(p, pile) {
-  const title = `${seatName(p)}: ${pile === 'discard' ? 'grave' : 'deleted cards'}`;
+  const title = `${seatName(p)}: ${pile === 'discard' ? 'grave' : 'removed from play'}`;
   let picked = -1;
   openModal(() => {
     const list = R.pub.pl[p][pile];
@@ -959,7 +959,7 @@ function pileMenu(p, pile) {
       const card = CARD_BY_ID[list[picked]];
       const idx = picked;
       const mv = (label, dest) => btn(label, () => pileTo(pile, idx, dest));
-      return h('div', {}, cardDetail(card), p === R.me ? h('div', { class: 'bar' }, mv('Play to field', 'field'), mv('To hand', 'hand'), mv('Shuffle into deck', 'deckShuffle'), pile === 'discard' ? mv('Delete', 'removed') : mv('To grave', 'discard')) : null,
+      return h('div', {}, cardDetail(card), p === R.me ? h('div', { class: 'bar' }, mv('Play to field', 'field'), mv('To hand', 'hand'), mv('Shuffle into deck', 'deckShuffle'), pile === 'discard' ? mv('Remove from play', 'removed') : mv('To grave', 'discard')) : null,
         btn('Back', () => { picked = -1; renderModal(); }));
     }
     return h('div', {}, h('h2', {}, title), list.length ? h('div', { class: 'grid' }, list.map((cid, i) => cardView(CARD_BY_ID[cid], { onclick: () => { picked = i; renderModal(); } })).reverse()) : h('p', { class: 'muted' }, 'Empty.'));
@@ -1061,7 +1061,7 @@ function piles(p) {
   if (isMe) dragSource(deck, { k: 'deck' });
   return h('div', { class: 'piles' }, deck,
     h('button', { class: 'pile', type: 'button', 'data-drop': `pile:discard:${p}`, 'data-pile': 'discard', onclick: () => pileMenu(p, 'discard'), title: 'Grave' }, top ? cardView(top, { still: true }) : h('div', { class: 'card empty' }, 'Grave'), h('span', { class: 'pile-n' }, d.discard.length)),
-    h('button', { class: 'removed', type: 'button', 'data-drop': `pile:removed:${p}`, 'data-pile': 'removed', onclick: () => pileMenu(p, 'removed'), title: 'Deleted cards' }, 'Del ', h('strong', {}, d.removed.length)));
+    h('button', { class: 'removed', type: 'button', 'data-drop': `pile:removed:${p}`, 'data-pile': 'removed', onclick: () => pileMenu(p, 'removed'), title: 'Removed from play' }, 'Out ', h('strong', {}, d.removed.length)));
 }
 function midBar() {
   const s = R.pub;

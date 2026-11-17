@@ -205,7 +205,7 @@ function filterBar(f, onChange) {
     h('option', { value: '' }, label), options.map((o) => h('option', { value: o, selected: String(f[key]) === String(o) }, key === 'level' ? 'Level ' + o : o)));
   return h('div', { class: 'filters' },
     h('input', { type: 'search', placeholder: 'Search name, trait or text', value: f.q || '', oninput: (e) => { f.q = e.target.value; onChange(true); } }),
-    sel('type', 'All types', TYPES), sel('level', 'All levels', [1, 2, 3]), sel('set', 'All sets', SETS));
+    sel('type', 'All types', TYPES), sel('level', 'All levels', [0, 1, 2, 3]), sel('set', 'All sets', SETS));
 }
 
 // ---------------------------------------------------------------- library
@@ -281,10 +281,10 @@ function viewDeckEdit(id) {
     pool.replaceChildren(...CARDS.filter((c) => matches(c, deckFilter)).map((c) => cardView(c, { count: deck.cards[c.id], dim: (deck.cards[c.id] || 0) >= MAX_COPIES, onclick: () => change(c.id, 1) })));
     const entries = Object.entries(deck.cards).map(([cid, n]) => [CARD_BY_ID[cid], n]).filter(([c]) => c).sort((a, b) => a[0].level - b[0].level || a[0].name.localeCompare(b[0].name));
     const n = deckSize(deck);
-    const byLevel = [1, 2, 3].map((lv) => entries.filter(([c]) => c.level === lv).reduce((a, [, k]) => a + k, 0));
+    const byLevel = [0, 1, 2, 3].map((lv) => entries.filter(([c]) => c.level === lv).reduce((a, [, k]) => a + k, 0));
     side.replaceChildren(
       h('div', { class: 'deck-total ' + (n === DECK_SIZE ? 'ok' : 'warn') }, `${n} / ${DECK_SIZE} cards`),
-      h('div', { class: 'muted' }, `Level 1: ${byLevel[0]} · Level 2: ${byLevel[1]} · Level 3: ${byLevel[2]}`),
+      h('div', { class: 'muted' }, `${byLevel[0] ? `Level 0: ${byLevel[0]} · ` : ''}Level 1: ${byLevel[1]} · Level 2: ${byLevel[2]} · Level 3: ${byLevel[3]}`),
       entries.length ? null : h('p', { class: 'muted' }, 'Tap cards to add them. Up to 3 copies of each.'),
       entries.map(([c, k]) => h('div', { class: 'deck-line t-' + c.type },
         h('button', { class: 'linkish', onclick: () => openModal(() => cardDetail(c)) }, `${k}× ${c.name}`), h('span', { class: 'lv' }, 'Lv' + c.level),

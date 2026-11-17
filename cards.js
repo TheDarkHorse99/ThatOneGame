@@ -56,7 +56,7 @@ Clamorous Woodpecker|unit|Fauna|x,0,3,x|1|If you control a Forest, you may draw 
 Wicked Trees|object|Dark Flora||2|When your unit Ambushes, it gets +4 of your choice until end of turn.
 Rotting Leaves|object|Dark Flora||1|You have +1 Bonus Plays. It must be to Hide a unit.
 Feasting Rabbits|unit|Dark Fauna|x,2,2,x|1|At the start of your turn you may Ambush, then play 2 "Feasting Rabbits" from your deck.
-Sinister Fairy|unit|Dark Fauna, fairy|3,5,3,x|2|1) When an opposing unit attacks you, you may Ambush.\n2) This gets +1YG for each Hidden card you control.
+Sinister Fairy|unit|Dark Fauna, fairy|1,5,3,x|2|1) When an opposing unit attacks you, you may Ambush.\n2) This gets +1YG for each Hidden card you control.
 Mutated Stag|unit|Dark Fauna|x,5,2,x|2|1) When your opponent would draw a card, you may Ambush.\n2) When your opponent draws a card, you may discard a card and draw a card.
 Nocturnal Beasts|event|Dark||1|Flip all your Dark Fauna face down.
 Moonlit Glade|location|Dark, Forest||1|Your Dark Fauna that have been Ambushed get +1RYGB.
@@ -93,10 +93,10 @@ Deal with the Devil|object|contract||2|This card cannot be removed from the fiel
 Bargain for your Life|object|contract||1|At the beginning of your turn, lose 5 life\nAnytime you would lose life, you must mill that many cards instead
 Demon’s Covenant|object|contract||2|At the beginning of your turn, lose 5 life\nAll demons you control get +3R
 Pact of the Summoned|object|contract||1|At the beginning of your turn, lose 5 life\nYou have +2 Bonus Plays.
-Lucifer, Prolonged Punishment|unit|devil/fallen angel|6,6,x,x|3|You cannot lose by the effects of “Deal with the Devil”\nWhen played, play a contract and a Lv1 demon from your deck
+Lucifer, Prolonged Punishment|unit|devil/fallen angel|6,6,x,6|3|You cannot lose by the effects of “Deal with the Devil”\nWhen played, play a contract and a Lv1 demon from your deck
 Crossroads Demon|unit|demon|2,4,x,x|1|(Quick): When an opposing unit attacks, you may play this from your hand\nWhen this unit is destroyed in combat, the unit that attacked is Condemned (When it leaves the field, remove it from play)
 Gates to Gehenna|location|hell||1|At the end of each turn, gain 1 life for each contract you control\nOPT: You may play a demon or devil from your grave
-Lucifer, the Morning Star|unit|devil/fallen angel|6,6,x,x|3|Units this unit destroys in combat are Condemned\nWhen this unit destroys another unit, it gets +1RY\nThis unit can attack twice, if you lost 5 or more life this turn.
+Lucifer, the Morning Star|unit|devil/fallen angel|6,6,x,6|3|Units this unit destroys in combat are Condemned\nWhen this unit destroys another unit, it gets +1RYB\nThis unit can attack twice, if you lost 5 or more life this turn.
 Loophole|event|||1|Send one of your contracts to the grave
 Posessing Demon|unit|demon|1,1,x,x|1|When played, you may destroy this unit to take control of an opposing lv1 unit.
 Demon of the Reap|unit|demon|4,2,x,x|1|Units this unit destroys are Condemned
@@ -106,7 +106,7 @@ Throne of Gehenna|location|hell||3|Your units with "Lucifer" in the name cannot 
 Contract of the Damned|object|contract||1|At the beginning of your turn, lose 5 life.\nAt the end of your turn, you may destroy one of your demons to destroy one of your opponent's Lvl 2 or less units and it's Condemned.
 Fiend of Gluttony|unit|Demon|4,4,x,x|2|When this unit destroys another unit, it gets +2 R or Y
 Fiend of Envy|unit|Demon|x,3,3,x|2|When this unit is played, if your opponent has more life then you, gain 5 life. If they have more cards in hand than you, draw 2.
-Fiend of Lust|unit|Demon|2,5,2,x|2|Rest this unit: Your opponent and you each draw 1 and gain 3 life. You get +1 bonus play this turn.
+Fiend of Lust|unit|Demon|2,5,1,x|2|Rest this unit: Your opponent and you each draw 1 and gain 3 life. You get +1 bonus play this turn.
 `,
   'Ghost Tree': String.raw`
 The Ghost Tree|location|Undead Flora||2|Action: OPT: You may play an Undead unit from your grave and it may attack this turn.\nAt the end of your turn it is destroyed.
@@ -210,6 +210,27 @@ Parasitic Spirit|unit||0,0,0,0|1|If you put 2 cards into the soul of a unit this
 Deceitful Trickster|unit||x,4,4,x|2|1) At the beginning of your turn, if you have more than 10 life, you may have your life become 10, then draw a card.\n2) At the end of this turn, destroy this unit, then gain 5 life.
 Painmeister|unit||x,2,2,x|1|(Action): OPT: Lose 3 life, then gain 1 Bonus Play this turn.
 Nourishment for the Soul|event|||1|Send a card from your grave to the soul of a unit on the field, then gain 3 life.
+`,
+  'Three Witch Trees': String.raw`
+Clotho, The Tree of Spinning Yarn|object|Witch||2|1) Discard this card from your hand to search your deck for a "Lachesis". You cannot use a Lachesis' discard ability this turn.\n2) OPT: If you have the other two trees, discard a card and search your deck for a "Thread of Fate" card.
+Lachesis, The Tree of Allotted Time|object|Witch||2|1) Discard this card from your hand to search your deck for an "Atropos". You cannot use an Atropos' discard ability this turn.\n2) OPT: If you have the other two trees, discard a card from hand to change the level of a "Thread of Fate" object to the discarded card's level, then draw 1.
+Atropos, The Tree of Inexorable Death|object|Witch||2|1) Discard this card from your hand to search your deck for a "Clotho". You cannot use a Clotho's discard ability this turn.\n2) OPT: If you have the other two trees, send a "Thread of Fate" card to the grave to destroy a unit with the same level.
+Thread of Fate|object|||0|1) When played, draw a card.\n2) If you have the 3 trees, you have +1 Bonus Plays.
+Atropos, Death Has Come|unit|Witch|2,6,x,6|3|COST: [Sacrifice an Atropos tree]\nWhen played, you may discard any number of cards and destroy that many of your opponent's units.
+Lachesis, Measured Lethality|unit|Witch|1,1,x,1|3|COST: [Sacrifice a Lachesis tree]\nWhen this deals damage to your opponent, your opponent loses half their life instead (rounded up).
+Clotho, Weaving the End|unit|Witch|x,7,x,7|3|COST: [Sacrifice a Clotho tree]\nWhen played, shuffle back all "Thread of Fate" cards in your grave. Draw a card for each one shuffled, and your opponent discards a card for every 2 shuffled.
+Witch Hunt|event|||1|Reveal a card in hand named "Clotho", "Lachesis", or "Atropos". If you do, search your deck for a witch object and add it to hand.
+The Lake Below the Three Tall Trees|location|||2|OPT: When you discard a card for the effect of an object, you may draw a card.
+Mythical Distaff|object|||0|1) When on the field or in the grave, this card's name is also "Thread of Fate".\n2) OPT: Discard a witch card and draw 2 cards.\n3) If you have the three trees, you have +1 Bonus Play.
+Pulling the Thread|event|||3|Deal dmg to your opponent equal to half the number of "Thread of Fate" in your grave, rounded down.
+Animate Object|event|||3|Choose one of your objects. It becomes a unit this turn with RYGB equal to thrice its level.
+Forest Fae|unit||x,4,x,3|2|When this unit attacks, you may look at the top 5 cards of your deck and add one witch object or unit to your hand.
+Keeper of the Lake|unit||x,x,1,1|2|1) At the beginning of your turn, if you have a witch object on your field with Tree in its name, draw a card.\n2) If you have 2 witch objects with Tree in their different names, this unit can't be destroyed by combat.\n3) If you have 3 witch objects with Tree in their different names, you have +1 Bonus Play.
+Scholar of the Lake|unit||3,3,x,x|1|This unit gets +1RY for each of the trees.
+Infinite Duplication Spell|event|||2|Shuffle 2 cards from your grave and this card back into your deck.
+Cultivator of the Trees|unit||x,x,3,x|1|OPT: When you send a "Thread of Fate" from the field to the grave, you may draw a card and gain 3 life.
+Burn the Dead|event|||1|Choose 5 cards in your opponent's grave, and remove them from play.
+Archwitch's Ward|object|||2|Your other objects not named "Archwitch's Ward" cannot be removed from the field by card effects.
 `,
 };
 
